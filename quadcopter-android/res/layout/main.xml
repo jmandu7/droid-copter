@@ -1,12 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout android:id="@+id/main_layout" 
+	xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    >
-<TextView  
-    android:layout_width="fill_parent" 
-    android:layout_height="wrap_content" 
-    android:text="@string/hello"
-    />
+    android:fadingEdgeLength="0sp">
+    
+    <LinearLayout
+    android:orientation="horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    
+    	<Button android:text="Start" 
+		android:id="@+id/start_server" 
+		android:layout_width="wrap_content" 
+		android:layout_height="wrap_content" />
+		
+		<TextView  
+	    android:layout_width="fill_parent" 
+	    android:layout_height="wrap_content" 
+	    android:text="ip address: "
+	    />
+		
+		<TextView  
+		android:id="@+id/ip_address"
+	    android:layout_width="fill_parent" 
+	    android:layout_height="wrap_content" 
+	    />
+	</LinearLayout>
+	
+	<com.quadcopter.ui.CameraPreviewSurface android:id="@+id/camera_preview_surface"
+	android:layout_width="490px"
+	android:layout_height="326px"
+	android:keepScreenOn="true"/>								
 </LinearLayout>
