@@ -3,7 +3,6 @@ package com.quadcopter.webserver;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,7 +10,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Random;
-
 import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
@@ -25,6 +23,9 @@ import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.params.BasicHttpParams;
 
+import com.quadcopter.webserver.servlets.Servlet;
+import com.quadcopter.webserver.servlets.ServletLoader;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -36,6 +37,8 @@ import android.util.Log;
 public class WebServerThread extends Thread 
 {
 	private static final String TAG = "WebServerThread";
+	
+	private static final String SERVLET_PACKAGE = "com.quadcopter.webserver.servlets";
 
 	private int mPort;
 
@@ -51,6 +54,8 @@ public class WebServerThread extends Thread
 	private static final int COOKIE_EXPIRY_SECONDS = 3600;
 	
 	private byte[] webCameraImg = null;
+	
+	private ServletLoader servletLoader = null;
 	
 	public void setWebCamImg(byte[] img)
 	{
@@ -151,8 +156,7 @@ public class WebServerThread extends Thread
 				Log.i(TAG, "Sending WebCam Image");
 				sendWebCamImage(serverConnection);
 			} else {
-				Log.i(TAG, "No action for " + requestLine.getUri());
-				sendNotFound(serverConnection);
+				doSomeSweetAction(serverConnection, request, requestLine);
 			}
 			serverConnection.flush();
 			serverConnection.close();
@@ -160,6 +164,66 @@ public class WebServerThread extends Thread
 			Log.e(TAG, "Problem with socket " + e.toString());
 		} catch (HttpException e) {
 			Log.e(TAG, "Problemw with HTTP server " + e.toString());
+		}
+	}
+	
+	/**
+	 * This function tries to load a servlet. If it can't find a servlet
+	 * then it tries to load a page from the root directory. If it still
+	 * can't find anything then it sends a "page not found" page
+	 * 
+	 * @param serverConnection
+	 * @param request
+	 * @param requestLine
+	 * @throws HttpException
+	 * @throws IOException
+	 */
+	private void doSomeSweetAction(
+				DefaultHttpServerConnection serverConnection, 
+				HttpRequest request,
+				RequestLine requestLine) throws HttpException, IOException
+	{
+		String data = null;
+		//Make sure we have an instance of servletLoader 
+		//ServletLoader will load an instance of a servlet
+		//We have a global variable because, it will keep
+		//previously loaded servlets in memory.
+		if (servletLoader==null) 
+		{
+			servletLoader = new ServletLoader();
+		}
+		//The string that is to the left of the question mark
+		//and without the leading slash is the page name
+		String uri = requestLine.getUri();
+		String pageName = uri.contains("?")?uri.split("?")[0]:uri;
+		pageName = pageName.replace("/", "");
+		
+		//Attempt to load the page as a servlet. If we can't 
+		//load it as a servlet then we will attempt to load
+		//the file within our root html directory
+		Servlet servlet = servletLoader.loadServlet(SERVLET_PACKAGE + "." + pageName);
+		if (servlet==null)
+		{
+			
+			data = readFileFromHomeDirectory(pageName);
+			if (data!=null)
+			{
+				Log.i(TAG, "Sending page - " + pageName);
+				sendResponse(Servlet.getHTTPSuccessResponse(data), serverConnection);
+			} else
+			{
+				//if data is null then we couldn't load from servlet or file. So
+				//we send the page not found.
+				Log.i(TAG, "No action for " + requestLine.getUri());
+				sendNotFound(serverConnection);
+			}
+		} else 
+		{
+			//run servlet
+			Log.i(TAG, "Runing servlet - " + SERVLET_PACKAGE + "." + pageName);
+			HttpResponse response = servlet.runServlet(requestLine);
+			//send response
+			sendResponse(response, serverConnection);
 		}
 	}
 
@@ -248,12 +312,10 @@ public class WebServerThread extends Thread
 			DefaultHttpServerConnection serverConnection)
 			throws UnsupportedEncodingException, HttpException, IOException 
 	{
-		HttpResponse response = new BasicHttpResponse(new HttpVersion(1, 1), 200,
-		"OK");
+		HttpResponse response = new BasicHttpResponse(new HttpVersion(1, 1), 200,"OK");
 		String body = readFileFromHomeDirectory(page);
 		response.setEntity(new StringEntity(body));
-		serverConnection.sendResponseHeader(response);
-		serverConnection.sendResponseEntity(response);
+		sendResponse(response, serverConnection);
 	}
 	
 	private void sendHTMLPage(String page, HttpResponse response,
@@ -262,6 +324,13 @@ public class WebServerThread extends Thread
 	{
 		String body = readFileFromHomeDirectory(page);
 		response.setEntity(new StringEntity(body));
+		sendResponse(response, serverConnection);
+	}
+	
+	private void sendResponse(HttpResponse response,
+			DefaultHttpServerConnection serverConnection)
+			throws HttpException, IOException 
+	{
 		serverConnection.sendResponseHeader(response);
 		serverConnection.sendResponseEntity(response);
 	}
@@ -299,7 +368,7 @@ public class WebServerThread extends Thread
 //		serverConnection.sendResponseEntity(response);
 //	}
 
-	public String readFileFromHomeDirectory(String strFileName)
+	public static String readFileFromHomeDirectory(String strFileName)
 	{
 		String ret = "";
 		try{
@@ -312,12 +381,8 @@ public class WebServerThread extends Thread
 				ret += readString;
 			}
 			fileIS.close();
-		} catch (FileNotFoundException e) {
+		} catch (Exception e) {
 			ret = null;
-			e.printStackTrace();
-		} catch (IOException e){
-			ret = null;
-			e.printStackTrace();
 		} 
 		return ret;
 	}
