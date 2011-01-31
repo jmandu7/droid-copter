@@ -1,26 +1,48 @@
 <html>
-<head>
-<title>QuadCopter WebServer</title>
-<script type="text/javascript" language="JavaScript">
-	newImage = new Image();
-	
-	function timedRefresh()
-	{
-		LoadNewImage();
-		var t=setTimeout("timedRefresh()",1000);
-	}
-
-	function LoadNewImage()
-	{
-		var unique = new Date();
-		document.images.webcam.src = newImage.src;
-		newImage.src = "webcam.jpg?time=" + unique.getTime();
-	}
-</script>
-</head>
-<body onload="javascript:timedRefresh();">
-
-<img src="webcam.jpg" name="webcam" width="640" height="480">
-
-</body>
+	<head>
+		<title>QuadCopter WebServer</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+		<script type="text/javascript" language="JavaScript">
+			var saveImage = false;
+			var unique = '';
+			//--either put your droid IP (and port) here, or leave blank if running from device
+			var host = 'http://192.168.1.4:9999/';
+			
+			$(document).ready(function(){
+				$('#inputSave').click(function() {
+					saveImage = true;
+				});
+				
+				$('#inputSubmitIP').click(function() {
+					host = 'http://' + $('#inputIP').attr('value') + ':9999/';
+				});
+				
+				newImage = new Image();
+				refreshImage();
+			});
+			
+			function refreshImage()
+			{
+				if(saveImage)
+				{
+					$('body').append('<br>' + unique + '<br><div style="width: 480; height: 640; margin-top: 150px; margin-left: -50px"><img style="-webkit-transform: rotate(+90deg); -moz-transform: rotate(+90deg);" src="' + host + 'webcam.jpg?time=' + unique.getTime() + '"></div>');
+					saveImage = false;
+				}
+			
+				unique = new Date();
+				$('#imgDynamic').attr('src', host + 'webcam.jpg?time=' + unique.getTime());
+				var t = setTimeout('refreshImage()', 1000);
+			}
+			
+		</script>
+	</head>
+	<body>
+		<input id="inputIP" type="text" value="Droid IP"></input><input id="inputSubmitIP" type="submit"></input>
+		<div style="width: 480; height: 640; margin-top: 150px; margin-left: -50px;">
+			<img id="imgDynamic" style="-webkit-transform: rotate(+90deg); -moz-transform: rotate(+90deg);" src="webcam.jpg">
+		</div>
+		<div>
+			<input id="inputSave" style="font-size: 36px;" type="button" value="Save Frame"/>
+		</div>
+	</body>
 </html>
