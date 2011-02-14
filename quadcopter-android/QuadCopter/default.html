@@ -6,7 +6,7 @@
 			var saveImage = false;
 			var unique = '';
 			//--either put your droid IP (and port) here, or leave blank if running from device
-			var host = 'http://192.168.1.4:9999/';
+			var host = 'http://10.191.132.116:9999/';
 			
 			$(document).ready(function(){
 				$('#inputSave').click(function() {
@@ -16,6 +16,17 @@
 				$('#inputSubmitIP').click(function() {
 					host = 'http://' + $('#inputIP').attr('value') + ':9999/';
 				});
+				
+				$('#inputSubmitPost').click(function() {					 
+					var response = $.ajax({
+						url: host + 'EchoServlet',
+						async: false
+					}).responseText;
+					
+					alert(response);
+				});
+				
+				
 				
 				newImage = new Image();
 				refreshImage();
@@ -38,6 +49,7 @@
 	</head>
 	<body>
 		<input id="inputIP" type="text" value="Droid IP"></input><input id="inputSubmitIP" type="submit"></input>
+		<input id="inputPost" type="text" value="Post String"></input><input id="inputSubmitPost" type="submit"></input>
 		<div style="width: 480; height: 640; margin-top: 150px; margin-left: -50px;">
 			<img id="imgDynamic" style="-webkit-transform: rotate(+90deg); -moz-transform: rotate(+90deg);" src="webcam.jpg">
 		</div>
