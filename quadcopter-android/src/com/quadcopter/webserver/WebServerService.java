@@ -38,7 +38,7 @@ public class WebServerService extends Service
 	public static String PREFS_REQUIRE_LOGIN = "REQUIRE_LOGIN";
 	public static String PREFS_PASSWORD = "PASSWORD";
 
-	private static final int DEFAULT_PORT = 9999;
+	private static final int DEFAULT_PORT = 80;
 
 	private static final String TAG = "WebServerService";
 

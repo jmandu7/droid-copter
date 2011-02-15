@@ -221,7 +221,7 @@ public class WebServerThread extends Thread
 		{
 			//run servlet
 			Log.i(TAG, "Runing servlet - " + SERVLET_PACKAGE + "." + pageName);
-			HttpResponse response = servlet.runServlet(requestLine);
+			HttpResponse response = servlet.runServlet(serverConnection, request);
 			//send response
 			sendResponse(response, serverConnection);
 		}
