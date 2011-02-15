@@ -6,7 +6,7 @@
 			var saveImage = false;
 			var unique = '';
 			/*either put your droid IP (and port) here, or leave blank if running from device*/
-			var host = 'http://192.168.1.4:9999/';
+			var host = 'http://10.191.158.132:8080/';
 			
 			$(document).ready(function(){
 				$('#inputSave').click(function() {
@@ -14,17 +14,22 @@
 				});
 				
 				$('#inputSubmitIP').click(function() {
-					host = 'http://' + $('#inputIP').attr('value') + ':9999/';
+					host = 'http://' + $('#inputIP').attr('value') + ':8080/';
 					$('#aLogin').attr('href', host);
 				});
 				
 				$('#inputSubmitPost').click(function() {
+					var dateSent = new Date();
 					$.post(host + 'EchoServlet', {PostText: $('#inputPost').attr('value')},
 					function(response){
-						alert(response);
+						/*alert(response);*/
 					})
 					.error(function(){
 						alert('error');
+					})
+					.success(function(){
+						var dateRec = new Date();
+						alert(dateRec - dateSent);
 					});
 				});				
 				
