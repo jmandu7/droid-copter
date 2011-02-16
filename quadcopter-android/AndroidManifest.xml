@@ -16,16 +16,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-		<service android:enabled="true" android:permission="android.permission.INTERNET" android:name=".webserver.WebServerService" android:exported="true" android:process=":WebServer">
+      	
+		<!-- This runs in a seperate process from the rest of the application.
+			I did this because we don't ever want this part to crash.
+			So . . . by seperating it, we make so any other part of our system
+			crasing will not cause this to crash -->
+		<service android:enabled="true" android:permission="android.permission.INTERNET" android:name=".background.BackgroundService" android:exported="true" android:process=":WebServer">
 	      	<intent-filter>
-	        	<action android:name="com.quadcopter.webserver.IWebServerService"/>
+	        	<action android:name="com.quadcopter.background.IBackgroundService"/>
 	       	</intent-filter>
       	</service>
     </application>
 	<uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/> 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     
     <uses-sdk android:minSdkVersion="8" />
 </manifest> 
