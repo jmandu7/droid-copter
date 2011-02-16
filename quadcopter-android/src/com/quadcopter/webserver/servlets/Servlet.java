@@ -11,8 +11,13 @@ import org.apache.http.message.BasicHttpResponse;
 
 public abstract class Servlet 
 {
+	//This is called when someone goes to the servlet page
 	public abstract HttpResponse runServlet(DefaultHttpServerConnection serverConnection, HttpRequest request);
 	
+	//This function is the first time this class is loaded
+	public void setupServlet(){}
+	
+	//this can be used to build a response based on a string
 	public static HttpResponse getHTTPSuccessResponse(String body)
 	{
 		HttpResponse response = new BasicHttpResponse(new HttpVersion(1, 1), 200,"OK");
