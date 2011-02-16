@@ -9,13 +9,15 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.DefaultHttpServerConnection;
 import org.apache.http.message.BasicHttpResponse;
 
+import android.content.Context;
+
 public abstract class Servlet 
 {
 	//This is called when someone goes to the servlet page
 	public abstract HttpResponse runServlet(DefaultHttpServerConnection serverConnection, HttpRequest request);
 	
 	//This function is the first time this class is loaded
-	public void setupServlet(){}
+	public void setupServlet(Context context){}
 	
 	//this can be used to build a response based on a string
 	public static HttpResponse getHTTPSuccessResponse(String body)
