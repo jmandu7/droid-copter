@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -26,17 +27,21 @@ import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.quadcopter.R;
-import com.quadcopter.webserver.IWebServerService;
+import com.quadcopter.background.IBackgroundService;
 
 public class QuadCopterActivity extends Activity implements OnClickListener, PreviewCallback{
 	public static String TAG = "QuadCopterActivity";
 	
-	private IWebServerService mWebService;
+	private IBackgroundService mBackgroundService;
 	
 //	CameraPreview mCamPreview;
 	
+    // Intent request codes
+    private static final int REQUEST_ENABLE_BT = 1;
+    
 	boolean startServerOnBind = false;
 	
     private ServiceConnection mWebServiceConnection = new ServiceConnection() {
@@ -45,27 +50,33 @@ public class QuadCopterActivity extends Activity implements OnClickListener, Pre
 		public void onServiceDisconnected(ComponentName name) {
 			// This is called when the connection with the service has been
             // unexpectedly disconnected -- that is, its process crashed.
-			mWebService = null;
+			mBackgroundService = null;
 			//mCamPreview.mWebService = null;
 		}
 		
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			mWebService = IWebServerService.Stub.asInterface(service);
+			mBackgroundService = IBackgroundService.Stub.asInterface(service);
 			try {
 				//if the web server needs to be started then start it
-				if (mWebService.isRunning())
+				if (mBackgroundService.isRunning())
 				{
 					((Button)findViewById(R.id.start_server)).setText("Stop");
+					//show ip address - works for LAN
+			        TextView lblIpAddress = (TextView)findViewById(R.id.ip_address);
+			        Context c = QuadCopterActivity.this.getApplicationContext(); 
+			        String ip = getIPAddress(c);
+			        
+			        lblIpAddress.setText(ip+":"+mBackgroundService.getPort());
 				}else if (startServerOnBind)
 				{
-					mWebService.start();
+					mBackgroundService.start();
 			        //show ip address - works for LAN
 			        TextView lblIpAddress = (TextView)findViewById(R.id.ip_address);
 			        Context c = QuadCopterActivity.this.getApplicationContext(); 
 			        String ip = getIPAddress(c);
 			        
-			        lblIpAddress.setText(ip+":"+mWebService.getPort());
+			        lblIpAddress.setText(ip+":"+mBackgroundService.getPort());
 				}
 			} catch (RemoteException e) {
 				// TODO Auto-generated catch block
@@ -94,35 +105,44 @@ public class QuadCopterActivity extends Activity implements OnClickListener, Pre
         
 		//Startup the WebServerService 
         Intent serviceIntent = new Intent();
-        serviceIntent.setAction(IWebServerService.class.getName());
-        bindService(serviceIntent, mWebServiceConnection, Context.BIND_AUTO_CREATE);
+        serviceIntent.setAction(IBackgroundService.class.getName());
+        startService(serviceIntent);
+//        bindService(serviceIntent, mWebServiceConnection, Context.BIND_AUTO_CREATE);
         
         TextView lblIpAddress = (TextView)findViewById(R.id.ip_address);
         lblIpAddress.setText("unavaliable");
+        
+        
+        // If BT is not on, request that it be enabled.
+        // setupChat() will then be called during onActivityResult
+        if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+        }
     }
 	
     public void onClick(View v) {
 		Button btn = (Button) v;
 		if (btn.getText().equals("Start"))
 		{
-			if (mWebService==null)
+			if (mBackgroundService==null)
 			{
 				//Startup the WebServerService 
 				startServerOnBind = true;
 		        Intent serviceIntent = new Intent();
-		        serviceIntent.setAction(IWebServerService.class.getName());
+		        serviceIntent.setAction(IBackgroundService.class.getName());
 		        bindService(serviceIntent, mWebServiceConnection, Context.BIND_AUTO_CREATE);
 			} else
 			{
 				try {
-					mWebService.start();
+					mBackgroundService.start();
 					
 			        //show ip address - works for LAN
 			        TextView lblIpAddress = (TextView)findViewById(R.id.ip_address);
 			        Context c = QuadCopterActivity.this.getApplicationContext(); 
 			        String ip = getIPAddress(c);
 			        
-			        lblIpAddress.setText(ip+":"+mWebService.getPort());
+			        lblIpAddress.setText(ip+":"+mBackgroundService.getPort());
 			        
 				} catch (RemoteException e) {
 					// TODO Auto-generated catch block
@@ -132,10 +152,10 @@ public class QuadCopterActivity extends Activity implements OnClickListener, Pre
 			btn.setText("Stop");
 		} else
 		{
-			if (mWebService!=null)
+			if (mBackgroundService!=null)
 			{
 				try {
-					mWebService.stop();
+					mBackgroundService.stop();
 					
 			        TextView lblIpAddress = (TextView)findViewById(R.id.ip_address);
 			        lblIpAddress.setText("unavaliable");
@@ -148,10 +168,27 @@ public class QuadCopterActivity extends Activity implements OnClickListener, Pre
 			btn.setText("Start");
 		}
 	}
+    
+	@Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+        case REQUEST_ENABLE_BT:
+            // When the request to enable Bluetooth returns
+            if (resultCode == Activity.RESULT_OK) {
+                // Bluetooth is now enabled, so set up a chat session
+
+            } else {
+                // User did not enable Bluetooth or an error occured
+                Log.d(TAG, "BT not enabled");
+                Toast.makeText(this, "Unable to enable bluetooth", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
+    }
 
 	@Override
 	public void onPreviewFrame(byte[] data, Camera camera) {
-		if (mWebService!=null)
+		if (mBackgroundService!=null)
 		{
 			try {
 				Camera.Parameters params = camera.getParameters();
@@ -168,7 +205,7 @@ public class QuadCopterActivity extends Activity implements OnClickListener, Pre
 						80, baos);
 				
 				//Pass the JPEG image to the WebServer
-				mWebService.setWebCamByteArray(baos.toByteArray());
+				mBackgroundService.setWebCamByteArray(baos.toByteArray());
 				
 			} catch (RemoteException e) {
 				// TODO Auto-generated catch block
