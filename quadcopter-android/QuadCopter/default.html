@@ -4,9 +4,9 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
 		<script type="text/javascript" language="JavaScript">
 			var saveImage = false;
+			var stopPosts;
 			var unique = '';
-			/*either put your droid IP (and port) here, or leave blank if running from device*/
-			var host = 'http://10.191.158.132:8080/';
+			var host = window.location;
 			
 			$(document).ready(function(){
 				$('#inputSave').click(function() {
@@ -14,27 +14,29 @@
 				});
 				
 				$('#inputSubmitIP').click(function() {
-					host = 'http://' + $('#inputIP').attr('value') + ':8080/';
-					$('#aLogin').attr('href', host);
+					host = 'http://' + $('#customIP').val() + ':8080/';
+				});
+				
+				$('#testPost').click(function() {
+					stopPosts = false;
+					refreshInfo();
+				});
+				
+				$('#stopPost').click(function() {
+					stopPosts = true;
 				});
 				
 				$('#inputSubmitPost').click(function() {
 					var dateSent = new Date();
-					$.post(host + 'EchoServlet', {PostText: $('#inputPost').attr('value')},
+					$.post(host + 'EchoServlet', {PostText: $('#inputPost').val()},
 					function(response){
-						/*alert(response);*/
+						alert(response);
 					})
 					.error(function(){
 						alert('error');
 					})
-					.success(function(){
-						var dateRec = new Date();
-						alert(dateRec - dateSent);
-					});
-				});				
-				
-				$('#aLogin').attr('href', host);
-				newImage = new Image();
+				});
+
 				refreshImage();
 			});
 			
@@ -49,21 +51,47 @@
 				unique = new Date();
 				$('#imgDynamic').attr('src', host + 'webcam.jpg?time=' + unique.getTime());
 				var t = setTimeout('refreshImage()', 1000);
-			}
+			};
+			
+			function refreshInfo()
+			{
+				var sent = new Date();
+				$.post(host + 'EchoServlet', {PostText: $('#inputPost').val()})
+				.success(function(){
+					$('#recordedTimes').append('<td style="border: inset 1px;">' + (new Date() - sent) + '</td>');
+					if(!stopPosts)
+						var s = setTimeout('refreshInfo()', $('#querySeconds').val()*1000);					
+				});				
+								
+				var count = 0;
+				var total = 0;
+				$('td').each(function() {
+					count += parseInt($(this).html());
+					total++;
+				});
+				var avg = count/total;
+				
+				$('#averageTime').html('Average Response Time: ' + avg);
+			};
 			
 		</script>
 	</head>
 	<body>
-		<input id="inputIP" type="text" value="Droid IP"></input><input id="inputSubmitIP" type="submit"></input>
+		Custom IP:<input id="customIP" type="text"></input><input id="inputSubmitIP" type="submit" value="Use Custom IP"></input>
 		<br>
-		<a id="aLogin" href="" target="_blank">Login</a>
+		Post Data:<input id="inputPost" type="text" value="string"></input><input id="inputSubmitPost" type="submit" value="Post Test Data"></input>
 		<br>
-		<input id="inputPost" type="text" value="Post String"></input><input id="inputSubmitPost" type="submit"></input>
-		<div style="width: 480; height: 640; margin-top: 150px; margin-left: -50px;">
-			<img id="imgDynamic" style="-webkit-transform: rotate(+90deg); -moz-transform: rotate(+90deg);" src="webcam.jpg">
-		</div>
+		Frequency (seconds):<input id="querySeconds" type="text" value="1"></input><input id="testPost" type="submit" value="Start Test"></input><input id="stopPost" type="submit" value="Stop Test">
+		<br><br>
+		<div id="averageTime"></div>
+		<br>
+		<table id="recordedTimes" style="border: solid 1px;"></table>
+		<br>
 		<div>
 			<input id="inputSave" style="font-size: 36px;" type="button" value="Save Frame"/>
+		</div>
+		<div style="width: 480; height: 640; margin-top: 150px; margin-left: -50px;">
+			<img id="imgDynamic" style="-webkit-transform: rotate(+90deg); -moz-transform: rotate(+90deg);" src="webcam.jpg">
 		</div>
 	</body>
 </html>
