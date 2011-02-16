@@ -79,6 +79,16 @@ public class WebServerThread extends Thread
 		mSharedPreferences = sharedPreferences;
 		mCookiesDatabase = cookiesDatabase;
 		deleteOldCookies();
+		
+		//Make sure we have an instance of servletLoader 
+		//ServletLoader will load an instance of a servlet
+		//We have a global variable because, it will keep
+		//previously loaded servlets in memory.
+		servletLoader = new ServletLoader();
+		//some servlets need to be loaded as soon as we start
+		//the web server. So . . . we will load them here.
+		Servlet servlet = servletLoader.loadServlet(SERVLET_PACKAGE + "." + "CounterServlet");
+		servlet.setupServlet();
 	}
 
 	@Override
@@ -184,14 +194,6 @@ public class WebServerThread extends Thread
 				RequestLine requestLine) throws HttpException, IOException
 	{
 		String data = null;
-		//Make sure we have an instance of servletLoader 
-		//ServletLoader will load an instance of a servlet
-		//We have a global variable because, it will keep
-		//previously loaded servlets in memory.
-		if (servletLoader==null) 
-		{
-			servletLoader = new ServletLoader();
-		}
 		//The string that is to the left of the question mark
 		//and without the leading slash is the page name
 		String uri = requestLine.getUri();
