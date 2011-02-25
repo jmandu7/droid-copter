@@ -207,7 +207,7 @@ public class WebServerThread extends Thread
 		//remove everything to the right of the pound
 		pageName = pageName.contains("#")?pageName.split("#")[0]:pageName;
 		//replace the leading slash
-		pageName = pageName.replace("/", "");
+		pageName = pageName.charAt(0)=='/'?pageName.replaceFirst("/", ""):pageName;
 		
 		//Attempt to load page as a servlet. If we can't 
 		//load it as a servlet then we will attempt to load
