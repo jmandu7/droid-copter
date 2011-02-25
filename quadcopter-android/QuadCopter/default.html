@@ -2,11 +2,14 @@
 	<head>
 		<title>QuadCopter WebServer</title>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/jquery-ui.min.js"></script>
+		<link type="text/css" href="css/ui-lightness/jquery-ui-1.8.10.custom.css" rel="stylesheet" media="screen">
 		<script type="text/javascript" language="JavaScript">
 			var saveImage = false;
 			var stopPosts;
 			var unique = '';
 			var host = window.location;
+			var armed = false;
 			
 			$(document).ready(function(){
 				$('#inputSave').click(function() {
@@ -26,6 +29,50 @@
 					stopPosts = true;
 				});
 				
+				$('#submitArmDisarm').toggle(function() {
+					$(this).val('Disarm');
+					armed = true;
+					sendControls();					
+				},
+				function() {
+					$(this).val('Arm');
+					armed = false;
+				});
+				
+				setupControls('Roll');
+				setupControls('Pitch');
+				setupControls('Yaw');
+				
+				$('#divThrottleSlider').slider({
+					orientation: 'vertical',
+					value:0,
+					min: 0,
+					max: 1000,
+					step: 50,
+					slide: function(event, ui) {
+						$('#inputThrottleValue').val(ui.value);
+						$('#holdThrottleValue').val(ui.value + 1000);
+					}
+				});
+				$('#inputThrottleValue').val($('#divThrottleSlider').slider('value'));
+				$('#holdThrottleValue').val($('#divThrottleSlider').slider('value') + 1000);
+				
+				$('#submitHoldInputs').click(function() {
+					$('#divControls div').each(function() {
+						$(this).next().val($(this).slider('value') + 1000);
+					});
+				});
+				
+				$('#submitResetInputs').click(function() {
+					$('#divControls div').each(function() {
+						$(this).slider('value', 500);
+						$(this).prev().val(500);
+						$(this).next().val($(this).slider('value') + 1000);
+					});
+				});
+				
+				$('input:submit, a').button();
+				
 				$('#inputSubmitPost').click(function() {
 					var dateSent = new Date();
 					$.post(host + 'EchoServlet', {PostText: $('#inputPost').val()},
@@ -39,6 +86,17 @@
 
 				refreshImage();
 			});
+			
+			function sendControls()
+			{
+				$.post(host + 'EchoServlet', {Roll: $('#holdRollValue').val(), 
+				Pitch: $('#holdPitchValue').val(), Yaw: $('#holdYawValue').val(),
+				Throttle: $('#holdThrottleValue').val()})
+				if(armed)
+				{
+					var q = setTimeout('sendControls()', 1000);
+				}
+			};
 			
 			function refreshImage()
 			{
@@ -74,6 +132,21 @@
 				$('#averageTime').html('Average Response Time: ' + avg);
 			};
 			
+			function setupControls(controlName)
+			{
+				$('#div' + controlName + 'Slider').slider({
+					value:500,
+					min: 0,
+					max: 1000,
+					step: 100,
+					slide: function(event, ui) {
+						$('#input' +  controlName +  'Value').val(ui.value);
+					}
+				});
+				$('#input' +  controlName + 'Value').val($('#div' + controlName + 'Slider').slider('value'));
+				$('#hold' +  controlName + 'Value').val($('#div' + controlName + 'Slider').slider('value') + 1000);
+			};
+			
 		</script>
 	</head>
 	<body>
@@ -86,6 +159,38 @@
 		<div id="averageTime"></div>
 		<br>
 		<table id="recordedTimes" style="border: solid 1px;"></table>
+		<br>
+		<input id="submitArmDisarm" type="submit" value="Arm">
+		CONTROLS:
+		<div id="divControls" style="width: 400px; margin: 15px;">
+			Roll:
+			<input type="text" id="inputRollValue"/>
+			<div id="divRollSlider"></div>
+			Sending:
+			<input type="text" id="holdRollValue"/>
+			<br>
+			<br>
+			Pitch:
+			<input type="text" id="inputPitchValue"/>
+			<div id="divPitchSlider"></div>
+			Sending:
+			<input type="text" id="holdPitchValue"/>
+			<br>
+			<br>
+			Yaw:
+			<input type="text" id="inputYawValue"/>
+			<div id="divYawSlider"></div>
+			Sending:
+			<input type="text" id="holdYawValue"/>
+			<br>
+			<input id="submitHoldInputs" type="submit" value="Hold">
+			<input id="submitResetInputs" type="submit" value="Reset">
+		</div>
+		<br>
+		<div id="divThrottleSlider"></div>
+		Throttle: <input type="text" id="inputThrottleValue"/> Sending : <input type="text" id="holdThrottleValue"/>
+		<br>	
+		<br>
 		<br>
 		<div>
 			<input id="inputSave" style="font-size: 36px;" type="button" value="Save Frame"/>
