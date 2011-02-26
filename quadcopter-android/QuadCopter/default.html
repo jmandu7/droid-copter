@@ -108,9 +108,9 @@
 			
 			function sendControls()
 			{
-				$.post(host + 'EchoServlet', {Roll: $('#holdRollValue').val(), 
-				Pitch: $('#holdPitchValue').val(), Yaw: $('#holdYawValue').val(),
-				Throttle: $('#holdThrottleValue').val()});
+            var json = '{[{Roll: ' + $('#holdRollValue').val() + ',Pitch: ' + $('#holdPitchValue').val() + ',Yaw: ' + $('#holdYawValue').val() + ',Throttle: ' +      $('#holdThrottleValue').val() + '}]}';
+           
+            $.post(host + 'ControlReceiverServlet', {data: json});
 				if(armed)
 				{
 					var q = setTimeout('sendControls()', 1000);
