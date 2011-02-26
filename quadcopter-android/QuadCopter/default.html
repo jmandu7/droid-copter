@@ -9,7 +9,7 @@
 			var stopPosts;
 			var unique = '';
 			var host = window.location;
-			var armed = false;
+			var sending = false;
 			var getImages = false;
 			
 			$(document).ready(function(){
@@ -50,14 +50,17 @@
 					stopPosts = true;
 				});
 				
-				$('#submitArmDisarm').toggle(function() {
-					$(this).val('Disarm Controls');
-					armed = true;
-					sendControls();					
+				$('#submitSendControls').toggle(function() {
+					$('#lblControlStatus').css('color', 'green');
+					$('#lblControlStatus').html('Live');
+					$(this).val('Stop Sending Controls');
+					sending = true;
+					sendControls();
 				},
 				function() {
-					$(this).val('Arm Controls');
-					armed = false;
+					$(this).val('Start Sending Controls');
+					sending = false;
+					$('#lblControlStatus').html('');
 				});
 				
 				setupControls('Roll');
@@ -68,15 +71,18 @@
 					orientation: 'vertical',
 					value:0,
 					min: 0,
-					max: 1000,
-					step: 50,
+					max: 100,
+					step: 5,
 					slide: function(event, ui) {
 						$('#inputThrottleValue').val(ui.value);
-						$('#holdThrottleValue').val(ui.value + 1000);
 					}
 				});
 				$('#inputThrottleValue').val($('#divThrottleSlider').slider('value'));
-				$('#holdThrottleValue').val($('#divThrottleSlider').slider('value') + 1000);
+				$('#holdThrottleValue').val($('#divThrottleSlider').slider('value')*10 + 1000);
+				
+				$('#submitSetThrottle').click(function() {
+					$(this).next().val($('#divThrottleSlider').slider('value')*10 + 1000);
+				});
 				
 				$('#submitHoldInputs').click(function() {
 					$('#divControls div').each(function() {
@@ -108,10 +114,17 @@
 			
 			function sendControls()
 			{
-            var json = '{[{Roll: ' + $('#holdRollValue').val() + ',Pitch: ' + $('#holdPitchValue').val() + ',Yaw: ' + $('#holdYawValue').val() + ',Throttle: ' +      $('#holdThrottleValue').val() + '}]}';
-           
-            $.post(host + 'ControlReceiverServlet', {data: json});
-				if(armed)
+				var json = '{[{Roll: ' + $('#holdRollValue').val() + ',Pitch: ' + $('#holdPitchValue').val() + ',Yaw: ' + $('#holdYawValue').val() + ',Throttle: ' +      $('#holdThrottleValue').val() + '}]}';
+			   
+				$.post(host + 'ControlReceiverServlet', {data: json})
+						.error(function() {
+							if(sending)
+							{
+								$('#lblControlStatus').css('color', 'red');
+								$('#lblControlStatus').html('Error!');
+							}
+						});
+				if(sending)
 				{
 					var q = setTimeout('sendControls()', 1000);
 				}
@@ -172,8 +185,41 @@
 		</script>
 	</head>
 	<body>
+		<input id="submitSendControls" type="submit" value="Start Sending Controls"><label id="lblControlStatus"></label>
+		<div id="controlContainer" style="width: 500px margin-left: auto; margin-right: auto;">
+			<div id="divControls" style="width: 300px; margin: 15px; float: left;">
+				Roll:
+				<input type="text" id="inputRollValue"/>
+				<div id="divRollSlider"></div>
+				<input type="hidden" id="holdRollValue"/>
+				<br>
+				<br>
+				Pitch:
+				<input type="text" id="inputPitchValue"/>
+				<div id="divPitchSlider"></div>
+				<input type="hidden" id="holdPitchValue"/>
+				<br>
+				<br>
+				Yaw:
+				<input type="text" id="inputYawValue"/>
+				<div id="divYawSlider"></div>
+				<input type="hidden" id="holdYawValue"/>
+				<br>
+				<input id="submitHoldInputs" type="submit" value="Hold">
+				<input id="submitResetInputs" type="submit" value="Reset">
+			</div>
+			<div style="margin: 15px; float: right;">
+				Throttle: <input type="text" id="inputThrottleValue"/>
+				<div id="divThrottleSlider"></div>
+				<br>
+				<input id="submitSetThrottle" type="submit" value="Set">
+				<input type="hidden" id="holdThrottleValue"/>
+			</div>
+		</div>
+		<br>	
+		<br>
 		<input id="submitToggleDebug" type="submit" value="Show Debug Section">
-		<div id="divDebug" style="display:none">
+		<div id="divDebug" style="display:none; clear:both">
 			Custom IP:<input id="customIP" type="text"></input><input id="inputSubmitIP" type="submit" value="Use Custom IP"></input>
 			<br>
 			Post Data:<input id="inputPost" type="text" value="string"></input><input id="inputSubmitPost" type="submit" value="Post Test Data"></input>
@@ -184,37 +230,6 @@
 			<br>
 			<table id="recordedTimes" style="border: solid 1px;"></table>
 		</div>
-		<br>
-		<br>
-		<input id="submitArmDisarm" type="submit" value="Arm Controls">
-		<div id="divControls" style="width: 400px; margin: 15px;">
-			Roll:
-			<input type="text" id="inputRollValue"/>
-			<div id="divRollSlider"></div>
-			Sending:
-			<input type="text" id="holdRollValue"/>
-			<br>
-			<br>
-			Pitch:
-			<input type="text" id="inputPitchValue"/>
-			<div id="divPitchSlider"></div>
-			Sending:
-			<input type="text" id="holdPitchValue"/>
-			<br>
-			<br>
-			Yaw:
-			<input type="text" id="inputYawValue"/>
-			<div id="divYawSlider"></div>
-			Sending:
-			<input type="text" id="holdYawValue"/>
-			<br>
-			<input id="submitHoldInputs" type="submit" value="Hold">
-			<input id="submitResetInputs" type="submit" value="Reset">
-		</div>
-		<br>
-		<div id="divThrottleSlider"></div>
-		Throttle: <input type="text" id="inputThrottleValue"/> Sending : <input type="text" id="holdThrottleValue"/>
-		<br>	
 		<br>
 		<input id="submitTogglePhoto" type="submit" value="Show Photo Section">
 		<div id="divPhoto" style="display:none">
