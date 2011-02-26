@@ -10,8 +10,29 @@
 			var unique = '';
 			var host = window.location;
 			var armed = false;
+			var getImages = false;
 			
 			$(document).ready(function(){
+				$('#submitToggleDebug').toggle(function() {
+					$(this).val('Hide Debug Section');
+					$('#divDebug').slideDown(400);
+				}, function() {
+					stopPosts = true;
+					$(this).val('Show Debug Section');		
+					$('#divDebug').slideUp(400);	
+				});
+				
+				$('#submitTogglePhoto').toggle(function() {
+					$(this).val('Hide Photo Section');
+					$('#divPhoto').slideDown(400);
+					getImages = true;
+					refreshImage();					
+				}, function() {
+					getImages = false;
+					$(this).val('Show Photo Section');		
+					$('#divPhoto').slideUp(400);
+				});
+			
 				$('#inputSave').click(function() {
 					saveImage = true;
 				});
@@ -30,12 +51,12 @@
 				});
 				
 				$('#submitArmDisarm').toggle(function() {
-					$(this).val('Disarm');
+					$(this).val('Disarm Controls');
 					armed = true;
 					sendControls();					
 				},
 				function() {
-					$(this).val('Arm');
+					$(this).val('Arm Controls');
 					armed = false;
 				});
 				
@@ -83,8 +104,6 @@
 						alert('error');
 					})
 				});
-
-				refreshImage();
 			});
 			
 			function sendControls()
@@ -102,13 +121,16 @@
 			{
 				if(saveImage)
 				{
-					$('body').append('<br>' + unique + '<br><div style="width: 480; height: 640; margin-top: 150px; margin-left: -50px"><img style="-webkit-transform: rotate(+90deg); -moz-transform: rotate(+90deg);" src="' + host + 'webcam.jpg?time=' + unique.getTime() + '"></div>');
+					$('#divPhoto').append('<br>' + unique + '<br><div style="width: 480; height: 640; margin-top: 150px; margin-left: -50px"><img style="-webkit-transform: rotate(+90deg); -moz-transform: rotate(+90deg);" src="' + host + 'webcam.jpg?time=' + unique.getTime() + '"></div>');
 					saveImage = false;
 				}
 			
 				unique = new Date();
 				$('#imgDynamic').attr('src', host + 'webcam.jpg?time=' + unique.getTime());
-				var t = setTimeout('refreshImage()', 1000);
+				if(getImages)
+				{
+					var t = setTimeout('refreshImage()', 1000);
+				}
 			};
 			
 			function refreshInfo()
@@ -150,18 +172,21 @@
 		</script>
 	</head>
 	<body>
-		Custom IP:<input id="customIP" type="text"></input><input id="inputSubmitIP" type="submit" value="Use Custom IP"></input>
+		<input id="submitToggleDebug" type="submit" value="Show Debug Section">
+		<div id="divDebug" style="display:none">
+			Custom IP:<input id="customIP" type="text"></input><input id="inputSubmitIP" type="submit" value="Use Custom IP"></input>
+			<br>
+			Post Data:<input id="inputPost" type="text" value="string"></input><input id="inputSubmitPost" type="submit" value="Post Test Data"></input>
+			<br>
+			Frequency (seconds):<input id="querySeconds" type="text" value="1"></input><input id="testPost" type="submit" value="Start Test"></input><input id="stopPost" type="submit" value="Stop Test">
+			<br><br>
+			<div id="averageTime"></div>
+			<br>
+			<table id="recordedTimes" style="border: solid 1px;"></table>
+		</div>
 		<br>
-		Post Data:<input id="inputPost" type="text" value="string"></input><input id="inputSubmitPost" type="submit" value="Post Test Data"></input>
 		<br>
-		Frequency (seconds):<input id="querySeconds" type="text" value="1"></input><input id="testPost" type="submit" value="Start Test"></input><input id="stopPost" type="submit" value="Stop Test">
-		<br><br>
-		<div id="averageTime"></div>
-		<br>
-		<table id="recordedTimes" style="border: solid 1px;"></table>
-		<br>
-		<input id="submitArmDisarm" type="submit" value="Arm">
-		CONTROLS:
+		<input id="submitArmDisarm" type="submit" value="Arm Controls">
 		<div id="divControls" style="width: 400px; margin: 15px;">
 			Roll:
 			<input type="text" id="inputRollValue"/>
@@ -191,12 +216,14 @@
 		Throttle: <input type="text" id="inputThrottleValue"/> Sending : <input type="text" id="holdThrottleValue"/>
 		<br>	
 		<br>
-		<br>
-		<div>
-			<input id="inputSave" style="font-size: 36px;" type="button" value="Save Frame"/>
-		</div>
-		<div style="width: 480; height: 640; margin-top: 150px; margin-left: -50px;">
-			<img id="imgDynamic" style="-webkit-transform: rotate(+90deg); -moz-transform: rotate(+90deg);" src="webcam.jpg">
+		<input id="submitTogglePhoto" type="submit" value="Show Photo Section">
+		<div id="divPhoto" style="display:none">
+			<div>
+				<input id="inputSave" style="font-size: 36px;" type="button" value="Save Frame"/>
+			</div>
+			<div style="width: 480; height: 640; margin-top: 150px; margin-left: -50px;">
+				<img id="imgDynamic" style="-webkit-transform: rotate(+90deg); -moz-transform: rotate(+90deg);" src="webcam.jpg">
+			</div>
 		</div>
 	</body>
 </html>
