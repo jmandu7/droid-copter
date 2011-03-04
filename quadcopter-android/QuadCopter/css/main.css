@@ -1,0 +1,36 @@
+#controlContainer {
+	margin-left: auto;
+	margin-right: auto;
+}
+#divControls {
+	width: 350px;
+	margin: 15px;
+	float: left;
+}
+#divControlsRight {
+	width: 350px;
+	margin: 15px;
+	float: left;
+}
+#divBottom {
+	clear: both;
+}
+#divDebug {
+	display:none;
+}
+#recordedTimes {
+	border: solid 1px;
+}
+#divPhoto {
+	display: none;
+}
+#divImageHolder {
+	width: 480;
+	height: 640;
+	margin-top: 150px;
+	margin-left: -50px;
+}
+#imgDynamic {
+	-webkit-transform: rotate(+90deg);
+	-moz-transform: rotate(+90deg);
+}

@@ -1,193 +1,16 @@
 <html>
 	<head>
-		<title>QuadCopter WebServer</title>
-		<link type="text/css" href="css/ui-lightness/jquery-ui-1.8.10.custom.css" rel="stylesheet" media="screen">
+		<title>DroidCopter</title>
+		<link type="text/css" href="css/ui-lightness/jquery-ui-1.8.10.custom.css?v1.00" rel="stylesheet" media="screen">
+		<link type="text/css" href="css/main.css?v1.00" rel="stylesheet">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/jquery-ui.min.js"></script>
-		<script type="text/javascript" language="JavaScript">
-			var saveImage = false;
-			var stopPosts;
-			var unique = '';
-			var host = window.location;
-			var sending = false;
-			var getImages = false;
-			
-			$(document).ready(function(){
-				$('#submitToggleDebug').toggle(function() {
-					$(this).val('Hide Debug Section');
-					$('#divDebug').slideDown(400);
-				}, function() {
-					stopPosts = true;
-					$(this).val('Show Debug Section');		
-					$('#divDebug').slideUp(400);
-				});
-				
-				$('#submitTogglePhoto').toggle(function() {
-					$(this).val('Hide Photo Section');
-					$('#divPhoto').slideDown(400);
-					getImages = true;
-					refreshImage();					
-				}, function() {
-					getImages = false;
-					$(this).val('Show Photo Section');		
-					$('#divPhoto').slideUp(400);
-				});
-			
-				$('#inputSave').click(function() {
-					saveImage = true;
-				});
-				
-				$('#inputSubmitIP').click(function() {
-					host = 'http://' + $('#customIP').val() + ':8080/';
-				});
-				
-				$('#testPost').click(function() {
-					stopPosts = false;
-					refreshInfo();
-				});
-				
-				$('#stopPost').click(function() {
-					stopPosts = true;
-				});
-				
-				$('#submitSendControls').toggle(function() {
-					$('#lblControlStatus').css('color', 'green');
-					$('#lblControlStatus').html('Live');
-					$(this).val('Stop Sending Controls');
-					sending = true;
-					sendControls();
-				},
-				function() {
-					$(this).val('Start Sending Controls');
-					sending = false;
-					$('#lblControlStatus').html('');
-				});
-				
-				setupControls('Roll');
-				setupControls('Pitch');
-				setupControls('Yaw');
-				
-				$('#divThrottleSlider').slider({
-					orientation: 'vertical',
-					value:0,
-					min: 0,
-					max: 100,
-					step: 5,
-					slide: function(event, ui) {
-						$('#inputThrottleValue').val(ui.value);
-					}
-				});
-				$('#inputThrottleValue').val($('#divThrottleSlider').slider('value'));
-				$('#holdThrottleValue').val($('#divThrottleSlider').slider('value')*10 + 1000);
-				
-				$('#submitSetThrottle').click(function() {
-					$(this).next().val($('#divThrottleSlider').slider('value')*10 + 1000);
-				});
-				
-				$('#submitHoldInputs').click(function() {
-					$('#divControls div').each(function() {
-						$(this).next().val($(this).slider('value') + 1000);
-					});
-				});
-				
-				$('#submitResetInputs').click(function() {
-					$('#divControls div').each(function() {
-						$(this).slider('value', 500);
-						$(this).prev().val(500);
-						$(this).next().val($(this).slider('value') + 1000);
-					});
-				});
-				
-				$('input:submit, a').button();
-				
-				$('#inputSubmitPost').click(function() {
-					var dateSent = new Date();
-					$.post(host + 'EchoServlet', {PostText: $('#inputPost').val()},
-					function(response){
-						alert(response);
-					})
-					.error(function(){
-						alert('error');
-					})
-				});
-			});
-			
-			function sendControls()
-			{
-				var json = '{[{Roll: ' + $('#holdRollValue').val() + ',Pitch: ' + $('#holdPitchValue').val() + ',Yaw: ' + $('#holdYawValue').val() + ',Throttle: ' +      $('#holdThrottleValue').val() + '}]}';
-			   
-				$.post(host + 'ControlReceiverServlet', {data: json})
-						.error(function() {
-							if(sending)
-							{
-								$('#lblControlStatus').css('color', 'red');
-								$('#lblControlStatus').html('Error!');
-							}
-						});
-				if(sending)
-				{
-					var q = setTimeout('sendControls()', 1000);
-				}
-			};
-			
-			function refreshImage()
-			{
-				if(saveImage)
-				{
-					$('#divPhoto').append('<br>' + unique + '<br><div style="width: 480; height: 640; margin-top: 150px; margin-left: -50px"><img style="-webkit-transform: rotate(+90deg); -moz-transform: rotate(+90deg);" src="' + host + 'webcam.jpg?time=' + unique.getTime() + '"></div>');
-					saveImage = false;
-				}
-			
-				unique = new Date();
-				$('#imgDynamic').attr('src', host + 'webcam.jpg?time=' + unique.getTime());
-				if(getImages)
-				{
-					var t = setTimeout('refreshImage()', 1000);
-				}
-			};
-			
-			function refreshInfo()
-			{
-				var sent = new Date();
-				$.post(host + 'EchoServlet', {PostText: $('#inputPost').val()})
-				.success(function(){
-					$('#recordedTimes').append('<td style="border: inset 1px;">' + (new Date() - sent) + '</td>');
-					if(!stopPosts)
-						var s = setTimeout('refreshInfo()', $('#querySeconds').val()*1000);					
-				});				
-								
-				var count = 0;
-				var total = 0;
-				$('td').each(function() {
-					count += parseInt($(this).html());
-					total++;
-				});
-				var avg = count/total;
-				
-				$('#averageTime').html('Average Response Time: ' + avg);
-			};
-			
-			function setupControls(controlName)
-			{
-				$('#div' + controlName + 'Slider').slider({
-					value:500,
-					min: 0,
-					max: 1000,
-					step: 100,
-					slide: function(event, ui) {
-						$('#input' +  controlName +  'Value').val(ui.value);
-					}
-				});
-				$('#input' +  controlName + 'Value').val($('#div' + controlName + 'Slider').slider('value'));
-				$('#hold' +  controlName + 'Value').val($('#div' + controlName + 'Slider').slider('value') + 1000);
-			};
-			
-		</script>
+		<script src="js/main.js?v1.00"></script>
 	</head>
 	<body>
 		<input id="submitSendControls" type="submit" value="Start Sending Controls"><label id="lblControlStatus"></label>
-		<div id="controlContainer" style="width: 500px margin-left: auto; margin-right: auto;">
-			<div id="divControls" style="width: 300px; margin: 15px; float: left;">
+		<div id="controlContainer">
+			<div id="divControls">
 				Roll:
 				<input type="text" id="inputRollValue"/>
 				<div id="divRollSlider"></div>
@@ -208,36 +31,41 @@
 				<input id="submitHoldInputs" type="submit" value="Hold">
 				<input id="submitResetInputs" type="submit" value="Reset">
 			</div>
-			<div style="margin: 15px; float: right;">
+			<div id="divControlsRight">
 				Throttle: <input type="text" id="inputThrottleValue"/>
 				<div id="divThrottleSlider"></div>
 				<br>
 				<input id="submitSetThrottle" type="submit" value="Set">
 				<input type="hidden" id="holdThrottleValue"/>
+				<br><br>
+				<input id="submitCalibrate" type="submit" value="Calibrate">
+				<input id="submitArmDisarm" type="submit" value="Arm">
 			</div>
 		</div>
 		<br>	
 		<br>
-		<input id="submitToggleDebug" type="submit" value="Show Debug Section">
-		<div id="divDebug" style="display:none; clear:both">
-			Custom IP:<input id="customIP" type="text"></input><input id="inputSubmitIP" type="submit" value="Use Custom IP"></input>
-			<br>
-			Post Data:<input id="inputPost" type="text" value="string"></input><input id="inputSubmitPost" type="submit" value="Post Test Data"></input>
-			<br>
-			Frequency (seconds):<input id="querySeconds" type="text" value="1"></input><input id="testPost" type="submit" value="Start Test"></input><input id="stopPost" type="submit" value="Stop Test">
-			<br><br>
-			<div id="averageTime"></div>
-			<br>
-			<table id="recordedTimes" style="border: solid 1px;"></table>
-		</div>
-		<br>
-		<input id="submitTogglePhoto" type="submit" value="Show Photo Section">
-		<div id="divPhoto" style="display:none">
-			<div>
-				<input id="inputSave" style="font-size: 36px;" type="button" value="Save Frame"/>
+		<div id="divBottom">
+			<input id="submitToggleDebug" type="submit" value="Show Debug Section">
+			<div id="divDebug">
+				Custom IP:<input id="customIP" type="text"></input><input id="inputSubmitIP" type="submit" value="Use Custom IP"></input>
+				<br>
+				Post Data:<input id="inputPost" type="text" value="string"></input><input id="inputSubmitPost" type="submit" value="Post Test Data"></input>
+				<br>
+				Frequency (seconds):<input id="querySeconds" type="text" value="1"></input><input id="testPost" type="submit" value="Start Test"></input><input id="stopPost" type="submit" value="Stop Test">
+				<br><br>
+				<div id="averageTime"></div>
+				<br>
+				<table id="recordedTimes"></table>
 			</div>
-			<div style="width: 480; height: 640; margin-top: 150px; margin-left: -50px;">
-				<img id="imgDynamic" style="-webkit-transform: rotate(+90deg); -moz-transform: rotate(+90deg);" src="webcam.jpg">
+			<br>
+			<input id="submitTogglePhoto" type="submit" value="Show Photo Section">
+			<div id="divPhoto">
+				<div>
+					<input id="inputSave" type="submit" value="Save Current Frame"/>
+				</div>
+				<div id="divImageHolder">
+					<img id="imgDynamic" src="webcam.jpg">
+				</div>
 			</div>
 		</div>
 	</body>
