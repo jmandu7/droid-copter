@@ -5,10 +5,14 @@
 		<link type="text/css" href="css/main.css?v1.00" rel="stylesheet">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/jquery-ui.min.js"></script>
-		<script src="js/main.js?v1.00"></script>
+		<script src="js/main.js?v1.03"></script>
 	</head>
 	<body>
-		<input id="submitSendControls" type="submit" value="Start Sending Controls"><label id="lblControlStatus"></label>
+		<h1>Status: <label id="lblControlStatus">Offline</label></h1>
+		<input id="submitArmDisarm" type="submit" value="Arm">
+		<input id="submitKillSwitch" type="submit" value="Kill">
+		<br>
+		<hr>
 		<div id="controlContainer">
 			<div id="divControls">
 				Roll:
@@ -37,14 +41,17 @@
 				<br>
 				<input id="submitSetThrottle" type="submit" value="Set">
 				<input type="hidden" id="holdThrottleValue"/>
-				<br><br>
-				<input id="submitCalibrate" type="submit" value="Calibrate">
-				<input id="submitArmDisarm" type="submit" value="Arm">
+				<br>
 			</div>
 		</div>
-		<br>	
+		<br>
 		<br>
 		<div id="divBottom">
+			<hr>
+			<input id="submitCalibrate" type="submit" value="Calibrate">
+			<br>
+			<input id="submitFlyingMode" type="submit" value="Switch to Stable Mode">
+			<br>
 			<input id="submitToggleDebug" type="submit" value="Show Debug Section">
 			<div id="divDebug">
 				Custom IP:<input id="customIP" type="text"></input><input id="inputSubmitIP" type="submit" value="Use Custom IP"></input>

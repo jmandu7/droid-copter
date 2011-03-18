@@ -2,7 +2,7 @@ var saveImage = false;
 var stopPosts;
 var unique = '';
 var host = window.location;
-var sending = false;
+var armed = false;
 var getImages = false;
 
 $(document).ready(function(){
@@ -11,7 +11,7 @@ $(document).ready(function(){
 		$('#divDebug').slideDown(400);
 	}, function() {
 		stopPosts = true;
-		$(this).val('Show Debug Section');		
+		$(this).val('Show Debug Section');
 		$('#divDebug').slideUp(400);
 	});
 	
@@ -43,25 +43,31 @@ $(document).ready(function(){
 		stopPosts = true;
 	});
 	
-	$('#submitSendControls').toggle(function() {
-		$('#lblControlStatus').css('color', 'green');
-		$('#lblControlStatus').html('Live');
-		$(this).val('Stop Sending Controls');
-		sending = true;
-		sendControls();
-	},
-	function() {
-		$(this).val('Start Sending Controls');
-		sending = false;
-		$('#lblControlStatus').html('');
+	$('#submitArmDisarm').click(function() {
+		if(!armed)
+		{
+			postDataToAndroid('{Arm: 1}');
+			$(this).val('Disarm');
+			$('#lblControlStatus').css('color', 'green');
+			$('#lblControlStatus').html('Live');
+			armed = true;
+			sendControls();
+		}
+		else if($('#holdThrottleValue').val() < 1100)
+		{
+			postDataToAndroid('{Arm: 0}');
+			$(this).val('Arm');
+			armed = false;
+			$('#lblControlStatus').css('color', 'black');
+			$('#lblControlStatus').html('Offline');
+		}
+		else
+		{
+			alert('Decrease throttle before disarm');
+		}
 	});
 	
-	$('#submitArmDisarm').toggle(function() {
-		$(this).val('Disarm');
-	},
-	function() {
-		$(this).val('Arm');
-	});
+	$('#submitKillSwitch').click(killEngines);
 	
 	setupControls('Roll');
 	setupControls('Pitch');
@@ -98,6 +104,19 @@ $(document).ready(function(){
 		});
 	});
 	
+	$('#submitCalibrate').click(function() {
+		postDataToAndroid('{Calibrate: 1}');
+	});
+	
+	$('#submitFlyingMode').toggle(function() {
+		postDataToAndroid('{AcrobaticMode: 0}');
+		$(this).val('Switch to Acrobatic Mode');
+	},
+	function() {
+		postDataToAndroid('{AcrobaticMode: 1}');
+		$(this).val('Switch to Stable Mode');
+	});
+	
 	$('input:submit, a').button();
 	
 	$('#inputSubmitPost').click(function() {
@@ -112,23 +131,43 @@ $(document).ready(function(){
 	});
 });
 
+function killEngines()
+{
+	armed = false;
+	$('#holdThrottleValue').val('1000');
+	var json = '{Roll: 1500, Pitch: 1500, Yaw: 1500, Throttle: 1000}';
+	//--shutoff throttle
+	postDataToAndroid(json);
+	//--disarm
+	postDataToAndroid('{Arm: 0}');
+}
+
 function sendControls()
 {
-	var json = '{[{Roll: ' + $('#holdRollValue').val() + ',Pitch: ' + $('#holdPitchValue').val() + ',Yaw: ' + $('#holdYawValue').val() + ',Throttle: ' +      $('#holdThrottleValue').val() + '}]}';
-   
-	$.post(host + 'ControlReceiverServlet', {data: json})
-			.error(function() {
-				if(sending)
-				{
-					$('#lblControlStatus').css('color', 'red');
-					$('#lblControlStatus').html('Error!');
-				}
-			});
-	if(sending)
+	var json = '{Roll: ' + $('#holdRollValue').val() + ',Pitch: ' + $('#holdPitchValue').val() + ',Yaw: ' + $('#holdYawValue').val() + ',Throttle: ' + $('#holdThrottleValue').val() + '}';
+	postDataToAndroid(json);
+
+	if(armed)
 	{
 		var q = setTimeout('sendControls()', 1000);
 	}
 };
+
+function postDataToAndroid(data)
+{
+	$.ajax({
+		type: 'POST',
+		url: 'ControlReceiverServlet',
+		data: data,
+	})
+	.error(function() {
+		if(armed)
+		{
+			$('#lblControlStatus').css('color', 'red');
+			$('#lblControlStatus').html('Error!');
+		}
+	});
+}
 
 function refreshImage()
 {
