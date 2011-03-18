@@ -94,6 +94,8 @@ public class WebServerThread extends Thread
 		servlet.setupServlet(context);
 		servlet = servletLoader.loadServlet(SERVLET_PACKAGE + "." + "SendMessageServlet");
 		servlet.setupServlet(context);
+		servlet = servletLoader.loadServlet(SERVLET_PACKAGE + "." + "ControlReceiverServlet");
+		servlet.setupServlet(context);
 	}
 
 	@Override
@@ -389,7 +391,7 @@ public class WebServerThread extends Thread
 			BufferedReader buf = new BufferedReader(new InputStreamReader(fileIS));
 			String readString = new String();
 			while((readString = buf.readLine())!= null){
-				ret += readString;
+				ret += readString + "\n";
 			}
 			fileIS.close();
 		} catch (Exception e) {
