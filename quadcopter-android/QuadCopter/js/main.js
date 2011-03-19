@@ -140,6 +140,10 @@ function killEngines()
 	postDataToAndroid(json);
 	//--disarm
 	postDataToAndroid('{Arm: 0}');
+	//--reset labels
+	$('#submitArmDisarm').val('Arm');
+	$('#lblControlStatus').css('color', 'black');
+	$('#lblControlStatus').html('Offline');
 }
 
 function sendControls()
