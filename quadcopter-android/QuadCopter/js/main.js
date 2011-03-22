@@ -155,6 +155,11 @@ function sendControls()
 	{
 		var q = setTimeout('sendControls()', 1000);
 	}
+	else
+	{
+		//--make sure engines were killed (async function)
+		killEngines();
+	}
 };
 
 function postDataToAndroid(data)
