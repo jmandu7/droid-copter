@@ -5,6 +5,10 @@ var customHost = window.location;
 var armed = false;
 var getImages = false;
 var sensitivityFactor = 5;
+var w_down = false;
+var s_down = false;
+var a_down = false;
+var d_down = false;
 
 $(document).ready(function(){
 	$('#submitToggleDebug').toggle(function() {
@@ -64,7 +68,6 @@ $(document).ready(function(){
 			$('#lblControlStatus').css('color', 'green');
 			$('#lblControlStatus').html('Live');
 			armed = true;
-			sendControls();
 		}
 		else if($('#holdThrottleValue').val() < 1100)
 		{
@@ -108,6 +111,8 @@ $(document).ready(function(){
 		change: function(event, ui) {
 			$('#lblThrottleValue').html(ui.value);
 			$('#holdThrottleValue').val(ui.value * 10 + 1000);
+			if(armed)
+				sendControls();
 		}
 	});
 	$('#lblThrottleValue').html($('#divThrottleSlider').slider('value'));
@@ -201,42 +206,62 @@ $(document).ready(function(){
 	
 	//--Instant Controls
 	$(document).bind('keydown', 'w', function (evt){
-		var pitchSlider = $('#divPitchSlider');
-		var currentValue = pitchSlider.slider('value');
-		pitchSlider.slider('value', 500 - sensitivityFactor);
+		if(!w_down)
+		{
+			var pitchSlider = $('#divPitchSlider');
+			var currentValue = pitchSlider.slider('value');
+			pitchSlider.slider('value', 500 - sensitivityFactor);
+		}
+		w_down = true;
 		return false;
 	});
 	$(document).bind('keyup', 'w', function (evt){
+		w_down = false;
 		$('#divPitchSlider').slider('value', 500 );
 		return false;
 	});
 	$(document).bind('keydown', 's', function (evt){
-		var pitchSlider = $('#divPitchSlider');
-		var currentValue = pitchSlider.slider('value');
-		pitchSlider.slider('value', 500 + sensitivityFactor);
+		if(!s_down)
+		{
+			var pitchSlider = $('#divPitchSlider');
+			var currentValue = pitchSlider.slider('value');
+			pitchSlider.slider('value', 500 + sensitivityFactor);
+		}
+		s_down = true;
 		return false;
 	});
 	$(document).bind('keyup', 's', function (evt){
+		s_down = false;
 		$('#divPitchSlider').slider('value', 500);
 		return false;
 	});
 	$(document).bind('keydown', 'a', function (evt){
-		var rollSlider = $('#divRollSlider');
-		var currentValue = rollSlider.slider('value');
-		rollSlider.slider('value', 500 - sensitivityFactor);
+		if(!a_down)
+		{
+			var rollSlider = $('#divRollSlider');
+			var currentValue = rollSlider.slider('value');
+			rollSlider.slider('value', 500 - sensitivityFactor);
+		}
+		a_down = true;
 		return false;
 	});
 	$(document).bind('keyup', 'a', function (evt){
+		a_down = false;
 		$('#divRollSlider').slider('value', 500);
 		return false;
 	});
 	$(document).bind('keydown', 'd', function (evt){
-		var rollSlider = $('#divRollSlider');
-		var currentValue = rollSlider.slider('value');
-		rollSlider.slider('value', 500 + sensitivityFactor);
+		if(!d_down)
+		{
+			var rollSlider = $('#divRollSlider');
+			var currentValue = rollSlider.slider('value');
+			rollSlider.slider('value', 500 + sensitivityFactor);
+		}
+		d_down = true;
 		return false;
 	});
 	$(document).bind('keyup', 'd', function (evt){
+		d_down = false;
 		$('#divRollSlider').slider('value', 500);
 		return false;
 	});
@@ -259,8 +284,6 @@ function sendControls()
 		var json = '{Roll: ' + $('#holdRollValue').val() + ',Pitch: ' + $('#holdPitchValue').val() + ',Yaw: ' + $('#holdYawValue').val() + ',Throttle: ' + $('#holdThrottleValue').val() + '}';
 		//--send to android
 		postDataToAndroid(json);
-		//--call sendControls again
-		var q = setTimeout('sendControls()', 250);
 	}
 	else
 	{
@@ -356,6 +379,8 @@ function setupControls(controlName)
 		change: function(event, ui) {
 			$('#lbl' +  controlName +  'Value').html(ui.value);
 			$('#hold' +  controlName + 'Value').val(ui.value + 1000);
+			if(armed)
+				sendControls();
 		}
 	});
 	$('#lbl' +  controlName + 'Value').html($('#div' + controlName + 'Slider').slider('value'));
