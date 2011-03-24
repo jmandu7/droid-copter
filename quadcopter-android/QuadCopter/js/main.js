@@ -1,7 +1,7 @@
 var saveImage = false;
 var stopPosts;
 var unique = '';
-var host = window.location;
+var customHost = window.location;
 var armed = false;
 var getImages = false;
 var sensitivityFactor = 5;
@@ -20,19 +20,31 @@ $(document).ready(function(){
 		$(this).val('Hide Photo Section');
 		$('#divPhoto').slideDown(400);
 		getImages = true;
-		refreshImage();					
+		refreshImage();
 	}, function() {
 		getImages = false;
 		$(this).val('Show Photo Section');		
 		$('#divPhoto').slideUp(400);
 	});
-
-	$('#inputSave').click(function() {
-		saveImage = true;
+	
+	$('#inputLoadPage').click(function() {
+		$('#lblCurrentIP').html(document.domain);
+		
+		$('#divStartUp').css('display', 'none');
+		$('#divMainContent').css('display', 'block');
 	});
 	
 	$('#inputSubmitIP').click(function() {
-		host = 'http://' + $('#customIP').val() + ':8080/';
+		var customIP = $('#customIP').val();
+		customHost = 'http://' + customIP + ':8080/';
+		$('#lblCurrentIP').html('<a href=' + customHost + ' target="blank">' + customIP + '</a>');		
+		
+		$('#divStartUp').css('display', 'none');
+		$('#divMainContent').css('display', 'block');
+	});
+
+	$('#inputSave').click(function() {
+		saveImage = true;
 	});
 	
 	$('#testPost').click(function() {
@@ -128,7 +140,7 @@ $(document).ready(function(){
 	
 	$('#inputSubmitPost').click(function() {
 		var dateSent = new Date();
-		$.post(host + 'EchoServlet', {PostText: $('#inputPost').val()},
+		$.post(customHost + 'EchoServlet', {PostText: $('#inputPost').val()},
 		function(response){
 			alert(response);
 		})
@@ -248,7 +260,7 @@ function sendControls()
 		//--send to android
 		postDataToAndroid(json);
 		//--call sendControls again
-		var q = setTimeout('sendControls()', 1000);
+		var q = setTimeout('sendControls()', 250);
 	}
 	else
 	{
@@ -264,6 +276,22 @@ function sendControls()
 	}
 };
 
+function postDataToAndroid(data)
+{
+	$.ajax({
+		type: 'POST',
+		url: customHost + 'ControlReceiverServlet',
+		data: data,
+	})
+	.error(function() {
+		if(armed)
+		{
+			$('#lblControlStatus').css('color', 'red');
+			$('#lblControlStatus').html('Error!');
+		}
+	});
+}
+
 function resetValues()
 {
 	$('#divThrottleSlider').slider('value', 0);
@@ -277,32 +305,16 @@ function resetValues()
 	$('#lblControlStatus').html('Offline');
 }
 
-function postDataToAndroid(data)
-{
-	$.ajax({
-		type: 'POST',
-		url: 'ControlReceiverServlet',
-		data: data,
-	})
-	.error(function() {
-		if(armed)
-		{
-			$('#lblControlStatus').css('color', 'red');
-			$('#lblControlStatus').html('Error!');
-		}
-	});
-}
-
 function refreshImage()
 {
 	if(saveImage)
 	{
-		$('#divPhoto').append('<br>' + unique + '<br><div style="width: 480; height: 640; margin-top: 150px; margin-left: -50px"><img style="-webkit-transform: rotate(+90deg); -moz-transform: rotate(+90deg);" src="' + host + 'webcam.jpg?time=' + unique.getTime() + '"></div>');
+		$('#divPhoto').append('<br>' + unique + '<br><div style="width: 480; height: 640; margin-top: 150px; margin-left: -50px"><img style="-webkit-transform: rotate(+90deg); -moz-transform: rotate(+90deg);" src="' + customHost + 'webcam.jpg?time=' + unique.getTime() + '"></div>');
 		saveImage = false;
 	}
 
 	unique = new Date();
-	$('#imgDynamic').attr('src', host + 'webcam.jpg?time=' + unique.getTime());
+	$('#imgDynamic').attr('src', customHost + 'webcam.jpg?time=' + unique.getTime());
 	if(getImages)
 	{
 		var t = setTimeout('refreshImage()', 1000);
@@ -312,7 +324,7 @@ function refreshImage()
 function refreshInfo()
 {
 	var sent = new Date();
-	$.post(host + 'EchoServlet', {PostText: $('#inputPost').val()})
+	$.post(customHost + 'EchoServlet', {PostText: $('#inputPost').val()})
 	.success(function(){
 		$('#recordedTimes').append('<td style="border: inset 1px;">' + (new Date() - sent) + '</td>');
 		if(!stopPosts)
