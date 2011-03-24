@@ -1,15 +1,23 @@
+body {
+	font-size: 20px;
+}
 #controlContainer {
 	margin-left: auto;
 	margin-right: auto;
+	height: 200px;
 }
 #divControls {
-	width: 350px;
+	width: 450px;
 	margin: 15px;
 	float: left;
+}
+.ui-slider-range {
+	background: #1C94D5;
 }
 #divControlsRight {
 	width: 350px;
 	margin: 15px;
+	margin-left: 100px;
 	float: left;
 }
 #divBottom {

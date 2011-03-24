@@ -4,6 +4,7 @@ var unique = '';
 var host = window.location;
 var armed = false;
 var getImages = false;
+var sensitivityFactor = 5;
 
 $(document).ready(function(){
 	$('#submitToggleDebug').toggle(function() {
@@ -55,16 +56,25 @@ $(document).ready(function(){
 		}
 		else if($('#holdThrottleValue').val() < 1100)
 		{
-			postDataToAndroid('{Arm: 0}');
-			$(this).val('Arm');
 			armed = false;
-			$('#lblControlStatus').css('color', 'black');
-			$('#lblControlStatus').html('Offline');
+			//--sendControls in case they are not firing off
+			sendControls();
 		}
 		else
 		{
 			alert('Decrease throttle before disarm');
 		}
+	});
+	
+	var optionsHTML;
+	for(var i=5; i<= 25; i = i+5)
+	{
+		optionsHTML += '<option>' + i + '</option>';
+	}
+	$('#inputControlSensivity').html(optionsHTML);
+	
+	$('#inputControlSensivity').change(function() {
+		sensitivityFactor = parseInt($("#inputControlSensivity option:selected").text());
 	});
 	
 	$('#submitKillSwitch').click(killEngines);
@@ -74,33 +84,30 @@ $(document).ready(function(){
 	setupControls('Yaw');
 	
 	$('#divThrottleSlider').slider({
+		range: 'min',
 		orientation: 'vertical',
 		value:0,
 		min: 0,
 		max: 100,
 		step: 5,
 		slide: function(event, ui) {
-			$('#inputThrottleValue').val(ui.value);
+			$('#lblThrottleValue').html(ui.value);
+		},
+		change: function(event, ui) {
+			$('#lblThrottleValue').html(ui.value);
+			$('#holdThrottleValue').val(ui.value * 10 + 1000);
 		}
 	});
-	$('#inputThrottleValue').val($('#divThrottleSlider').slider('value'));
+	$('#lblThrottleValue').html($('#divThrottleSlider').slider('value'));
 	$('#holdThrottleValue').val($('#divThrottleSlider').slider('value')*10 + 1000);
 	
 	$('#submitSetThrottle').click(function() {
 		$(this).next().val($('#divThrottleSlider').slider('value')*10 + 1000);
 	});
 	
-	$('#submitHoldInputs').click(function() {
-		$('#divControls div').each(function() {
-			$(this).next().val($(this).slider('value') + 1000);
-		});
-	});
-	
 	$('#submitResetInputs').click(function() {
 		$('#divControls div').each(function() {
 			$(this).slider('value', 500);
-			$(this).prev().val(500);
-			$(this).next().val($(this).slider('value') + 1000);
 		});
 	});
 	
@@ -129,38 +136,146 @@ $(document).ready(function(){
 			alert('error');
 		})
 	});
+	
+	//--bind hotkeys
+	$(document).bind('keydown', 'backspace', function (evt){
+		killEngines();
+		return false; 
+	});
+	$(document).bind('keydown', 'del', function (evt){
+		killEngines();
+		return false; 
+	});
+	$(document).bind('keydown', 'esc', function (evt){
+		killEngines();
+		return false; 
+	});
+	$(document).bind('keydown', 'Shift', function (evt){
+		var throttleSlider = $('#divThrottleSlider');
+		var currentValue = throttleSlider.slider('value');
+		throttleSlider.slider('value', currentValue+5);
+		return false;
+	});
+	$(document).bind('keydown', 'Ctrl', function (evt){
+		var throttleSlider = $('#divThrottleSlider');
+		var currentValue = throttleSlider.slider('value');
+		throttleSlider.slider('value', currentValue-5);
+		return false;
+	});
+	$(document).bind('keydown', 'up', function (evt){
+		var pitchSlider = $('#divPitchSlider');
+		var currentValue = pitchSlider.slider('value');
+		pitchSlider.slider('value', currentValue+5);
+		return false;
+	});
+	$(document).bind('keydown', 'down', function (evt){
+		var pitchSlider = $('#divPitchSlider');
+		var currentValue = pitchSlider.slider('value');
+		pitchSlider.slider('value', currentValue-5);
+		return false;
+	});
+	$(document).bind('keydown', 'left', function (evt){
+		var rollSlider = $('#divRollSlider');
+		var currentValue = rollSlider.slider('value');
+		rollSlider.slider('value', currentValue-5);
+		return false;
+	});
+	$(document).bind('keydown', 'right', function (evt){
+		var rollSlider = $('#divRollSlider');
+		var currentValue = rollSlider.slider('value');
+		rollSlider.slider('value', currentValue+5);
+		return false;
+	});
+	
+	//--Instant Controls
+	$(document).bind('keydown', 'w', function (evt){
+		var pitchSlider = $('#divPitchSlider');
+		var currentValue = pitchSlider.slider('value');
+		pitchSlider.slider('value', 500 - sensitivityFactor);
+		return false;
+	});
+	$(document).bind('keyup', 'w', function (evt){
+		$('#divPitchSlider').slider('value', 500 );
+		return false;
+	});
+	$(document).bind('keydown', 's', function (evt){
+		var pitchSlider = $('#divPitchSlider');
+		var currentValue = pitchSlider.slider('value');
+		pitchSlider.slider('value', 500 + sensitivityFactor);
+		return false;
+	});
+	$(document).bind('keyup', 's', function (evt){
+		$('#divPitchSlider').slider('value', 500);
+		return false;
+	});
+	$(document).bind('keydown', 'a', function (evt){
+		var rollSlider = $('#divRollSlider');
+		var currentValue = rollSlider.slider('value');
+		rollSlider.slider('value', 500 - sensitivityFactor);
+		return false;
+	});
+	$(document).bind('keyup', 'a', function (evt){
+		$('#divRollSlider').slider('value', 500);
+		return false;
+	});
+	$(document).bind('keydown', 'd', function (evt){
+		var rollSlider = $('#divRollSlider');
+		var currentValue = rollSlider.slider('value');
+		rollSlider.slider('value', 500 + sensitivityFactor);
+		return false;
+	});
+	$(document).bind('keyup', 'd', function (evt){
+		$('#divRollSlider').slider('value', 500);
+		return false;
+	});
+	
 });
 
 function killEngines()
 {
-	armed = false;
-	$('#holdThrottleValue').val('1000');
-	var json = '{Roll: 1500, Pitch: 1500, Yaw: 1500, Throttle: 1000}';
-	//--shutoff throttle
-	postDataToAndroid(json);
 	//--disarm
-	postDataToAndroid('{Arm: 0}');
-	//--reset labels
-	$('#submitArmDisarm').val('Arm');
-	$('#lblControlStatus').css('color', 'black');
-	$('#lblControlStatus').html('Offline');
+	armed = false;
+	//--fire off sendControls (in case it is not already running)
+	sendControls();
 }
 
 function sendControls()
 {
-	var json = '{Roll: ' + $('#holdRollValue').val() + ',Pitch: ' + $('#holdPitchValue').val() + ',Yaw: ' + $('#holdYawValue').val() + ',Throttle: ' + $('#holdThrottleValue').val() + '}';
-	postDataToAndroid(json);
-
 	if(armed)
 	{
+		//--get current values from page
+		var json = '{Roll: ' + $('#holdRollValue').val() + ',Pitch: ' + $('#holdPitchValue').val() + ',Yaw: ' + $('#holdYawValue').val() + ',Throttle: ' + $('#holdThrottleValue').val() + '}';
+		//--send to android
+		postDataToAndroid(json);
+		//--call sendControls again
 		var q = setTimeout('sendControls()', 1000);
 	}
 	else
 	{
-		//--make sure engines were killed (async function)
-		killEngines();
+		//--shut off engines (if from kill switch)
+		$('#holdThrottleValue').val('1000');
+		var json = '{Roll: 1500, Pitch: 1500, Yaw: 1500, Throttle: 1000}';
+		//--shutoff throttle
+		postDataToAndroid(json);
+		//--disarm
+		postDataToAndroid('{Arm: 0}');
+		//--reset values
+		resetValues();
 	}
 };
+
+function resetValues()
+{
+	$('#divThrottleSlider').slider('value', 0);
+
+	$('#divControls div').each(function() {
+		$(this).slider('value', 500);
+	});
+	
+	$('#submitArmDisarm').val('Arm');
+	$('#lblControlStatus').css('color', 'black');
+	$('#lblControlStatus').html('Offline');
+}
 
 function postDataToAndroid(data)
 {
@@ -218,14 +333,19 @@ function refreshInfo()
 function setupControls(controlName)
 {
 	$('#div' + controlName + 'Slider').slider({
+		range: 'min',
 		value:500,
 		min: 0,
 		max: 1000,
-		step: 100,
+		step: 5,
 		slide: function(event, ui) {
-			$('#input' +  controlName +  'Value').val(ui.value);
+			$('#lbl' +  controlName +  'Value').html(ui.value);
+		},
+		change: function(event, ui) {
+			$('#lbl' +  controlName +  'Value').html(ui.value);
+			$('#hold' +  controlName + 'Value').val(ui.value + 1000);
 		}
 	});
-	$('#input' +  controlName + 'Value').val($('#div' + controlName + 'Slider').slider('value'));
+	$('#lbl' +  controlName + 'Value').html($('#div' + controlName + 'Slider').slider('value'));
 	$('#hold' +  controlName + 'Value').val($('#div' + controlName + 'Slider').slider('value') + 1000);
 };

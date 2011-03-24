@@ -6,6 +6,7 @@
 		<script src="js/jquery.min.js?v1.5"></script>
 		<script src="js/jquery-ui.min.js?v1.8.10"></script>
 		<script src="js/main.js?v1.03"></script>
+		<script src="js/jquery.hotkeys.js?v0.8"></script>
 	</head>
 	<body>
 		<h1>Status: <label id="lblControlStatus">Offline</label></h1>
@@ -13,33 +14,34 @@
 		<input id="submitKillSwitch" type="submit" value="Kill">
 		<br>
 		<hr>
+		Use W, S, A, D to control the quadcopter direction instantly.
+		<br>
+		Sensitivty : <select id="inputControlSensivity"></select>
 		<div id="controlContainer">
 			<div id="divControls">
-				Roll:
-				<input type="text" id="inputRollValue"/>
-				<div id="divRollSlider"></div>
-				<input type="hidden" id="holdRollValue"/>
-				<br>
-				<br>
 				Pitch:
-				<input type="text" id="inputPitchValue"/>
+				<label id="lblPitchValue"></label>
 				<div id="divPitchSlider"></div>
 				<input type="hidden" id="holdPitchValue"/>
 				<br>
 				<br>
+				Roll:
+				<label id="lblRollValue"></label>
+				<div id="divRollSlider"></div>
+				<input type="hidden" id="holdRollValue"/>
+				<br>
+				<br>
 				Yaw:
-				<input type="text" id="inputYawValue"/>
+				<label id="lblYawValue"></label>
 				<div id="divYawSlider"></div>
 				<input type="hidden" id="holdYawValue"/>
 				<br>
-				<input id="submitHoldInputs" type="submit" value="Hold">
-				<input id="submitResetInputs" type="submit" value="Reset">
+				<input id="submitResetInputs" type="submit" value="Reset Pitch/Roll/Yaw">
 			</div>
 			<div id="divControlsRight">
-				Throttle: <input type="text" id="inputThrottleValue"/>
+				Throttle: <label id="lblThrottleValue"></label>
 				<div id="divThrottleSlider"></div>
 				<br>
-				<input id="submitSetThrottle" type="submit" value="Set">
 				<input type="hidden" id="holdThrottleValue"/>
 				<br>
 			</div>
