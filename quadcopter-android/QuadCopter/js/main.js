@@ -295,12 +295,9 @@ function sendControls()
 	else
 	{
 		//--shut off engines (if from kill switch)
-		$('#holdThrottleValue').val('1000');
-		var json = '{Roll: 1500, Pitch: 1500, Yaw: 1500, Throttle: 1000}';
-		//--shutoff throttle
+		var json = '{Roll: 1500, Pitch: 1500, Yaw: 1500, Throttle: 1000, Arm: 0}';
+		//--shutoff throttle + disarm
 		postDataToAndroid(json);
-		//--disarm
-		postDataToAndroid('{Arm: 0}');
 		//--reset values
 		resetValues();
 	}
@@ -312,6 +309,9 @@ function postDataToAndroid(data)
 		type: 'POST',
 		url: customHost + 'ControlReceiverServlet',
 		data: data,
+		success: function(returnData) {
+			//--nothing for now
+		}
 	})
 	.error(function() {
 		if(armed)
