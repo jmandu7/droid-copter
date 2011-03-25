@@ -5,6 +5,7 @@ var customHost = window.location;
 var armed = false;
 var getImages = false;
 var sensitivityFactor = 5;
+var AcrobaticMode = 1;
 var w_down = false;
 var s_down = false;
 var a_down = false;
@@ -132,13 +133,19 @@ $(document).ready(function(){
 		postDataToAndroid('{Calibrate: 1}');
 	});
 	
-	$('#submitFlyingMode').toggle(function() {
-		postDataToAndroid('{AcrobaticMode: 0}');
-		$(this).val('Switch to Acrobatic Mode');
-	},
-	function() {
-		postDataToAndroid('{AcrobaticMode: 1}');
-		$(this).val('Switch to Stable Mode');
+	$('#submitFlyingMode').click(function() {
+		if(AcrobaticMode == 1)
+		{
+			AcrobaticMode = 0;
+			postDataToAndroid('{AcrobaticMode: 0}');
+			$(this).val('Switch to Acrobatic Mode');
+		}
+		else
+		{
+			AcrobaticMode = 1;
+			postDataToAndroid('{AcrobaticMode: 1}');
+			$(this).val('Switch to Stable Mode');
+		}
 	});
 	
 	$('input:submit, a').button();

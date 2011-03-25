@@ -14,7 +14,7 @@
 			<input id="inputLoadPage" type="submit" value="Continue"></input>	
 			<h3>Running From Local Machine</h3>
 			DroidCopter IP:
-			<input id="customIP" type="text" value="10.191.40.64"></input>
+			<input id="customIP" type="text" value="192.168.2.102"></input>
 			<input id="inputSubmitIP" type="submit" value="Submit"></input>
 			<br><br>
 			NOTE: For testing, add parameter '--disable-web-security' to chrome for posting from file://
@@ -25,6 +25,7 @@
 			<h1>IP: <label id="lblCurrentIP"><label></h1>
 			<h1>Status: <label id="lblControlStatus">Offline</label></h1>
 			<input id="submitArmDisarm" type="submit" value="Arm">
+			<input id="submitFlyingMode" type="submit" value="Switch to Stable Mode">
 			<input id="submitKillSwitch" type="submit" value="Kill">
 			<br>
 			<hr>
@@ -65,8 +66,6 @@
 			<div id="divBottom">
 				<hr>
 				<input id="submitCalibrate" type="submit" value="Calibrate">
-				<br>
-				<input id="submitFlyingMode" type="submit" value="Switch to Stable Mode">
 				<br>
 				<input id="submitToggleDebug" type="submit" value="Show Debug Section">
 				<div id="divDebug">
