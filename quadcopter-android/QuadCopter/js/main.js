@@ -217,7 +217,7 @@ $(document).ready(function(){
 		{
 			var pitchSlider = $('#divPitchSlider');
 			var currentValue = pitchSlider.slider('value');
-			pitchSlider.slider('value', 500 - sensitivityFactor);
+			pitchSlider.slider('value', 500 + sensitivityFactor);
 		}
 		w_down = true;
 		return false;
@@ -232,7 +232,7 @@ $(document).ready(function(){
 		{
 			var pitchSlider = $('#divPitchSlider');
 			var currentValue = pitchSlider.slider('value');
-			pitchSlider.slider('value', 500 + sensitivityFactor);
+			pitchSlider.slider('value', 500 - sensitivityFactor);
 		}
 		s_down = true;
 		return false;
