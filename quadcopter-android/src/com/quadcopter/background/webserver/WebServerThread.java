@@ -75,7 +75,7 @@ public class WebServerThread extends Thread
 	{
 		mContext = context;
 		mPort = port;
-		mServerSocket = new ServerSocket(mPort);
+		mServerSocket = new ServerSocket(mPort, 10);
 		mServerSocket.setReuseAddress(true);
 		mSharedPreferences = sharedPreferences;
 		mCookiesDatabase = cookiesDatabase;
