@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent" android:baselineAligned="true" android:orientation="vertical">
+    <LinearLayout android:id="@+id/linearLayout1" android:layout_height="wrap_content" android:layout_width="match_parent" android:orientation="horizontal">
+    	    <Button android:text="Arm" android:id="@+id/btnArm" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+    	    <Button android:text="Disarm" android:id="@+id/btnDisarm" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+    	    <Button android:text="Kill" android:id="@+id/btnKill" android:layout_width="match_parent" android:layout_height="wrap_content"></Button>
+    </LinearLayout>
+    
+    
+    <LinearLayout android:id="@+id/linearLayout2" android:layout_height="wrap_content" android:layout_width="match_parent"  android:orientation="horizontal">
+    	<LinearLayout android:id="@+id/linearLayout2" android:layout_height="wrap_content" android:layout_width="wrap_content"  android:orientation="vertical">
+    		<LinearLayout android:id="@+id/linearLayout2" android:layout_height="wrap_content" android:layout_width="wrap_content"  android:orientation="horizontal" android:layout_marginRight="10px">
+    			<Button android:id="@+id/decroll" android:text="-" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    			<TextView android:text="Roll" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="9pt"/>
+    			<Button android:id="@+id/introll" android:text="+" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    			<TextView android:id="@+id/rollval" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    		</LinearLayout>
+    		<LinearLayout android:id="@+id/linearLayout2" android:layout_height="wrap_content" android:layout_width="wrap_content"  android:orientation="horizontal" android:layout_marginRight="10px">
+    			<Button android:id="@+id/decpitch" android:text="-" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    			<TextView android:text="Pitch" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="9pt"/>
+    			<Button android:id="@+id/intpitch" android:text="+" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    			<TextView android:id="@+id/pitchval" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    		</LinearLayout>
+    		<LinearLayout android:id="@+id/linearLayout2" android:layout_height="wrap_content" android:layout_width="wrap_content"  android:orientation="horizontal" android:layout_marginRight="10px">
+    			<Button android:id="@+id/decyaw" android:text="-" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    			<TextView android:text="Yaw" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="9pt"/>
+    			<Button android:id="@+id/incyaw" android:text="+" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    			<TextView android:id="@+id/yawval" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    		</LinearLayout>
+    		<LinearLayout android:id="@+id/linearLayout2" android:layout_height="wrap_content" android:layout_width="wrap_content"  android:orientation="horizontal" android:layout_marginRight="10px">
+    			<Button android:id="@+id/decthrottle" android:text="-" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    			<TextView android:text="Throttle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="9pt"/>
+    			<Button android:id="@+id/intthrottle" android:text="+" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    			<TextView android:id="@+id/throttleval" android:layout_width="50px" android:layout_height="wrap_content"/>
+    		</LinearLayout>
+    	</LinearLayout>
+    	<LinearLayout android:id="@+id/linearLayout2" android:layout_height="wrap_content" android:layout_width="match_parent" android:orientation="vertical">
+    		<SeekBar android:id="@+id/sbRoll" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="1000" android:progress="500"/>
+    		
+    		<LinearLayout android:layout_height="20px" android:layout_width="wrap_content" android:orientation="vertical"/>
+    		<SeekBar android:id="@+id/sbPitch" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="1000" android:progress="500"/>
+    		
+    		<LinearLayout android:layout_height="20px" android:layout_width="wrap_content" android:orientation="vertical"/>
+    		<SeekBar android:id="@+id/sbYaw" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="1000" android:progress="500"/>
+    		
+    		<LinearLayout android:layout_height="20px" android:layout_width="wrap_content" android:orientation="vertical"/>
+    		<SeekBar android:id="@+id/sbThrottle" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="1000" android:progress="0"/>			
+    	</LinearLayout>
+    </LinearLayout>
+    
+    <LinearLayout android:id="@+id/linearLayout1" android:layout_height="wrap_content" android:layout_width="match_parent" android:orientation="horizontal">
+    	    <Button android:text="Acrobatic Mode" android:id="@+id/btnAcro" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+    	    <Button android:text="Stable Mode" android:id="@+id/btnStable" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+    	    <Button android:text="Reset" android:id="@+id/btnReset" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+    	    <Button android:text="-" android:id="@+id/decStep" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+    	    <TextView android:text="Step:" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="9pt"/>
+    	    <TextView android:id="@+id/stepSize" android:text="1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="9pt"/>
+    	    <Button android:text="+" android:id="@+id/incStep" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+    </LinearLayout>
+  
+</LinearLayout>

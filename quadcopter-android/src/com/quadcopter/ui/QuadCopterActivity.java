@@ -51,6 +51,7 @@ public class QuadCopterActivity extends Activity implements OnClickListener, Pre
 			// This is called when the connection with the service has been
             // unexpectedly disconnected -- that is, its process crashed.
 			mBackgroundService = null;
+			((TextView)findViewById(R.id.rf_controller)).setEnabled(false);
 			//mCamPreview.mWebService = null;
 		}
 		
@@ -61,6 +62,7 @@ public class QuadCopterActivity extends Activity implements OnClickListener, Pre
 				//if the web server needs to be started then start it
 				if (mBackgroundService.isRunning())
 				{
+					((TextView)findViewById(R.id.rf_controller)).setEnabled(true);
 					((Button)findViewById(R.id.start_server)).setText("Stop");
 					//show ip address - works for LAN
 			        TextView lblIpAddress = (TextView)findViewById(R.id.ip_address);
@@ -70,6 +72,7 @@ public class QuadCopterActivity extends Activity implements OnClickListener, Pre
 			        lblIpAddress.setText(ip+":"+mBackgroundService.getPort());
 				}else if (startServerOnBind)
 				{
+					((TextView)findViewById(R.id.rf_controller)).setEnabled(true);
 					mBackgroundService.start();
 			        //show ip address - works for LAN
 			        TextView lblIpAddress = (TextView)findViewById(R.id.ip_address);
@@ -119,6 +122,16 @@ public class QuadCopterActivity extends Activity implements OnClickListener, Pre
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
         }
+        
+        TextView control = ((TextView)findViewById(R.id.rf_controller));
+        control.setEnabled(false);
+        control.setClickable(true);
+        control.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(QuadCopterActivity.this, RFControllerActivity.class));
+			}
+		});
     }
 	
     public void onClick(View v) {
