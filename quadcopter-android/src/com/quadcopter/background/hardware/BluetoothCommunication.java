@@ -259,8 +259,14 @@ public class BluetoothCommunication {
         				c = msg.charAt(i);
         				if (c == ACK_FLAG)
         				{
-        					// message complete send the data
-        					broadcastMessage(fullMsg.toString());
+        					if ("IsAlive".equals(fullMsg.toString()))
+        					{
+        						this.write('I', "".getBytes());
+        					} else
+        					{
+	        					// message complete send the data
+	        					broadcastMessage(fullMsg.toString());
+        					}
 //    	                    mHandler.obtainMessage(BluetoothChat.MESSAGE_READ, fullMsg.length(), -1, fullMsg.toString().getBytes())
 //    	                            .sendToTarget();
         					fullMsg = new StringBuffer();
