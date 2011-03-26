@@ -144,7 +144,8 @@ public class WebServerThread extends Thread
 			RequestLine requestLine = request.getRequestLine();
 
 			/* First make sure user is logged in if that is required. */
-			boolean loggedIn = false;
+			boolean loggedIn = true;
+			//TODO set to false to require login
 			if (mSharedPreferences.getBoolean(
 					BackgroundService.PREFS_REQUIRE_LOGIN, true)) {
 				/* Does the user have a valid cookie? */
