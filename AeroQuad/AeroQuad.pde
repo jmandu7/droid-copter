@@ -422,7 +422,7 @@ void loop () {
   currentTime = micros();
   deltaTime = currentTime - previousTime;
   
-  echoTime = echoTime + deltaTime;
+  //echoTime = echoTime + deltaTime;
   
   
   /*if (echoTime/1000000 >= 1)
@@ -444,8 +444,8 @@ void loop () {
     else
       echoCount =0;
       
-    echoTest = false;*/
-  }
+    echoTest = false;
+  }*/
   
   G_Dt = deltaTime / 1000000.0;
   previousTime = currentTime;
