@@ -62,6 +62,7 @@ void flightControl(void) {
     
   // ***************************** Update Yaw ***************************
   #ifndef AeroQuad_v18
+  
   if (headingHoldConfig == ON) {
     //gyro.calculateHeading();
 
