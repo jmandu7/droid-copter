@@ -112,6 +112,8 @@ public:
   // Define all the virtual functions declared in the main class
   // ***********************************************************
   void initialize(void) {
+    
+    //Serial.print("I am here initialize\n");
     // Should do a WhoAmI to know if mag is present
     updateRegisterI2C(compassAddress, 0x01, 0x20);
     updateRegisterI2C(compassAddress, 0x02, 0x00); // continuous 10Hz mode
@@ -119,15 +121,18 @@ public:
     gyroStartHeading = getData();
     if (gyroStartHeading < 0) gyroStartHeading += 360;
     gyro.setStartHeading(gyroStartHeading);
+     //Serial.print("I am here initialize end\n");
   }
   
   const int getRawData(byte axis) {
+    //Serial.print("I am here getRaw\n");
     if (axis == XAXIS) return measuredMagX;
     if (axis == YAXIS) return measuredMagY;
     if (axis == ZAXIS) return measuredMagZ;
   }
   
   void measure(void) {
+   // Serial.print("I am here measure\n");
     sendByteI2C(compassAddress, 0x03);
     Wire.requestFrom(compassAddress, 6);
     measuredMagX = (Wire.receive() << 8) | Wire.receive();
@@ -140,12 +145,21 @@ public:
     sinRoll = sin(radians(flightAngle.getData(ROLL)));
     cosPitch = cos(radians(flightAngle.getData(PITCH)));
     sinPitch = sin(radians(flightAngle.getData(PITCH)));
-    magX = ((float)measuredMagX * magScale[XAXIS] + magOffset[XAXIS]) * cosPitch + ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * sinRoll * sinPitch + ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * cosRoll * sinPitch;
-    magY = ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * cosRoll - ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * sinRoll;
-    //magX = measuredMagX * cosPitch + measuredMagY * sinRoll * sinPitch + measuredMagZ * cosRoll * sinPitch;
-    //magY = measuredMagY * cosRoll - measuredMagZ * sinRoll;   
+    //magX = ((float)measuredMagX * magScale[XAXIS] + magOffset[XAXIS]) * cosPitch + ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * sinRoll * sinPitch + ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * cosRoll * sinPitch;
+    //magY = ((float)measuredMagY * magScale[YAXIS] + magOffset[YAXIS]) * cosRoll - ((float)measuredMagZ * magScale[ZAXIS] + magOffset[ZAXIS]) * sinRoll;
+    magX = measuredMagX * cosPitch + measuredMagY * sinRoll * sinPitch + measuredMagZ * cosRoll * sinPitch;
+    magY = measuredMagY * cosRoll - measuredMagZ * sinRoll;   
     compass = -degrees(atan2(-magY, magX));
     
+    //Serial.println(cosRoll);
+    //Serial.println(sinRoll);
+    //Serial.println(sinPitch);
+    //Serial.println(cosPitch);
+    //Serial.println(magX);
+    //Serial.println(magY);
+    //Serial.println();
+     
+ 
     // Check if gyroZero adjusted, if it is, reset gyroHeading to compass value
     if (gyroZero != gyro.getZero(YAW)) {
       gyro.setStartHeading(heading);
@@ -164,6 +178,18 @@ public:
     // Change from +/-180 to 0-360
     if (heading < 0) absoluteHeading = 360 + heading;
     else absoluteHeading = heading;
+    
+    //Serial.println(compass);
+    //Serial.println(heading);
+    //Serial.println(measuredMagY);
+    //Serial.println(measuredMagX);
+    //Serial.println(measuredMagZ);
+    //Serial.println(getRawData(XAXIS));
+    //Serial.println(getRawData(YAXIS));
+    //Serial.println(getRawData(ZAXIS));
+    
+    //Serial.println(absoluteHeading);
+
   }
 };
 
