@@ -1,5 +1,21 @@
+body {
+	background: grey;
+}
+.header {
+	height: 200px;
+	background: blue;
+}
+.divider {
+	height: 25px;
+	background: green;
+}
+.body {
+	background: grey;
+	width: 800px;
+	margin: 0px auto;
+}
 #divMainContent {
-	font-size: 20px;
+	font-size: 14px;
 }
 #controlContainer {
 	margin-left: auto;
@@ -7,7 +23,7 @@
 	height: 200px;
 }
 #divControls {
-	width: 450px;
+	width: 350px;
 	margin: 15px;
 	float: left;
 }
@@ -17,8 +33,7 @@
 #divControlsRight {
 	width: 350px;
 	margin: 15px;
-	margin-left: 100px;
-	float: left;
+	float: right;
 }
 #divBottom {
 	clear: both;
