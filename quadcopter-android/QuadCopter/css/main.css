@@ -36,20 +36,19 @@ body {
 }
 #controlContainer {
 	margin-left: 0px auto;
-	height: 200px;
+	height: 300px;
+	padding-bottom: 50px;
 }
 #divControls {
 	width: 350px;
 	margin: 15px;
 	float: left;
 }
-.ui-slider-range {
-	background: #1C94D5;
-}
 #divControlsRight {
-	width: 350px;
+	width: 275px;
 	height: 175px;
-	margin: 15px;
+	padding-top: 50px;
+	margin: 15px 35px;
 	float: right;
 }
 #divBottom {

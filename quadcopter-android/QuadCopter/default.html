@@ -4,7 +4,7 @@
 	<head>
 	    <meta charset="utf-8"> 
 		<title>DroidCopter</title>
-		<link type="text/css" href="css/ui-lightness/jquery-ui-1.8.10.custom.css?v1.00" rel="stylesheet" media="screen">
+		<link type="text/css" href="css/dot-luv/jquery-ui-1.8.11.custom.css" rel="stylesheet" media="screen">
 		<link type="text/css" href="css/main.css?v1.00" rel="stylesheet">
 		<script src="js/jquery.min.js?v1.5"></script>
 		<script src="js/jquery-ui.min.js?v1.8.10"></script>
@@ -40,35 +40,40 @@
 					Sensitivty : <select id="inputControlSensivity"></select>
 					<div id="controlContainer">
 						<div id="divControls">
-							Pitch:
-							<label id="lblPitchValue" class="sendValue"></label>
+							<h2>
+								Pitch:
+								<label id="lblPitchValue" class="sendValue"></label>
+							</h2>
 							<div id="divPitchSlider"></div>
 							<input type="hidden" id="holdPitchValue"/>
-							<br>
-							<br>
-							Roll:
-							<label id="lblRollValue" class="sendValue"></label>
+							<h2>
+								Roll:
+								<label id="lblRollValue" class="sendValue"></label>
+							</h2>
 							<div id="divRollSlider"></div>
 							<input type="hidden" id="holdRollValue"/>
-							<br>
-							<br>
-							Yaw:
-							<label id="lblYawValue" class="sendValue"></label>
+							<h2>
+								Yaw:
+								<label id="lblYawValue" class="sendValue"></label>
+							</h2>
 							<div id="divYawSlider"></div>
 							<input type="hidden" id="holdYawValue"/>
+							<br>
 							<br>
 							<input id="submitResetInputs" type="submit" value="Reset Pitch/Roll/Yaw">
 						</div>
 						<div id="divControlsRight">
-							Throttle: <label id="lblThrottleValue" class="sendValue"></label>
 							<div id="divThrottleSlider"></div>
 							<br>
+							<h2>
+								Throttle:
+								<label id="lblThrottleValue" class="sendValue"></label>
+							</h2>
+							(Shift - Increase, Control - Decrease)
 							<input type="hidden" id="holdThrottleValue"/>
 							<br>
 						</div>
 					</div>
-					<br>
-					<br>
 					<div id="divBottom">
 						<hr>
 						<input id="submitCalibrate" type="submit" value="Calibrate">

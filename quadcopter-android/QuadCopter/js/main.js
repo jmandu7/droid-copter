@@ -85,13 +85,16 @@ $(document).ready(function(){
 	});
 	
 	var optionsHTML;
+	var optionsElement = $('#inputControlSensivity');
 	for(var i=5; i<= 25; i = i+5)
 	{
 		optionsHTML += '<option>' + i + '</option>';
 	}
-	$('#inputControlSensivity').html(optionsHTML);
+	optionsElement.html(optionsHTML);
+	//--set default value
+	optionsElement.val('15').attr('selected', true);
 	
-	$('#inputControlSensivity').change(function() {
+	optionsElement.change(function() {
 		sensitivityFactor = parseInt($("#inputControlSensivity option:selected").text());
 	});
 	
