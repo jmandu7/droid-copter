@@ -1,24 +1,34 @@
+html {
+	background: #CCC;
+}
 body {
+	background: url(../img/bg.gif) center repeat-y;
 	font-family: Arial;
 	margin: 0px;
-	background: #CCCCCC;
+	color: #333;
+}
+.page {
+	margin: 0px auto;
+	width: 800px;
+	background: white;
 }
 .header {
-	margin: 0px auto;
-	height: 200px;
-	width: 800px;
-	padding: 5px 15px;
 	background: url(../img/header-bg.png) bottom repeat-x;
+	padding: 10px 15px;
 }
 .logo {
 	width: 400px;
-	margin: 0px auto;
+	margin: 0px 130px;
 }
 .body {
-	border-top: 3px grey;
 	background: url(../img/main-bg.gif) repeat-x;
-	width: 800px;
+	border-top: outset 3px #999999;
 	padding: 15px;
+}
+.footer {
+	background: url(../img/footer.gif) top center no-repeat;
+	height: 12px;
+	width: 818px;
 	margin: 0px auto;
 }
 #divMainContent {
@@ -38,6 +48,7 @@ body {
 }
 #divControlsRight {
 	width: 350px;
+	height: 175px;
 	margin: 15px;
 	float: right;
 }
