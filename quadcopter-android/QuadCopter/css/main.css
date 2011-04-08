@@ -1,25 +1,31 @@
 body {
-	background: grey;
+	font-family: Arial;
+	margin: 0px;
+	background: #CCCCCC;
 }
 .header {
+	margin: 0px auto;
 	height: 200px;
-	background: blue;
+	width: 800px;
+	padding: 5px 15px;
+	background: url(../img/header-bg.png) bottom repeat-x;
 }
-.divider {
-	height: 25px;
-	background: green;
+.logo {
+	width: 400px;
+	margin: 0px auto;
 }
 .body {
-	background: grey;
+	border-top: 3px grey;
+	background: url(../img/main-bg.gif) repeat-x;
 	width: 800px;
+	padding: 15px;
 	margin: 0px auto;
 }
 #divMainContent {
 	font-size: 14px;
 }
 #controlContainer {
-	margin-left: auto;
-	margin-right: auto;
+	margin-left: 0px auto;
 	height: 200px;
 }
 #divControls {
