@@ -128,6 +128,9 @@ $(document).ready(function(){
 		$(this).next().val($('#divThrottleSlider').slider('value')*10 + 1000);
 	});
 	
+	$('#addThrottle').click(increaseThrottle);
+	$('#subtractThrottle').click(decreaseThrottle);
+	
 	$('#submitResetInputs').click(function() {
 		$('#divControls div').each(function() {
 			$(this).slider('value', 500);
@@ -181,18 +184,14 @@ $(document).ready(function(){
 	});
 	$(document).bind('keydown', 'space', function (evt){
 		killEngines();
-		return false; 
+		return false;
 	});
 	$(document).bind('keydown', 'Shift', function (evt){
-		var throttleSlider = $('#divThrottleSlider');
-		var currentValue = throttleSlider.slider('value');
-		throttleSlider.slider('value', currentValue+1);
+		increaseThrottle();
 		return false;
 	});
 	$(document).bind('keydown', 'Ctrl', function (evt){
-		var throttleSlider = $('#divThrottleSlider');
-		var currentValue = throttleSlider.slider('value');
-		throttleSlider.slider('value', currentValue-1);
+		decreaseThrottle();
 		return false;
 	});
 	
@@ -202,14 +201,16 @@ $(document).ready(function(){
 		{
 			var pitchSlider = $('#divPitchSlider');
 			var currentValue = pitchSlider.slider('value');
-			pitchSlider.slider('value', 500 + sensitivityFactor);
+			pitchSlider.slider('value', currentValue + sensitivityFactor);
 		}
 		up_down = true;
 		return false;
 	});
 	$(document).bind('keyup', 'up', function (evt){
 		up_down = false;
-		$('#divPitchSlider').slider('value', 500 );
+		var pitchSlider = $('#divPitchSlider');
+		var currentValue = pitchSlider.slider('value');
+		$('#divPitchSlider').slider('value', currentValue - sensitivityFactor );
 		return false;
 	});
 	$(document).bind('keydown', 'down', function (evt){
@@ -217,14 +218,16 @@ $(document).ready(function(){
 		{
 			var pitchSlider = $('#divPitchSlider');
 			var currentValue = pitchSlider.slider('value');
-			pitchSlider.slider('value', 500 - sensitivityFactor);
+			pitchSlider.slider('value', currentValue - sensitivityFactor);
 		}
 		down_down = true;
 		return false;
 	});
 	$(document).bind('keyup', 'down', function (evt){
 		down_down = false;
-		$('#divPitchSlider').slider('value', 500);
+		var pitchSlider = $('#divPitchSlider');
+		var currentValue = pitchSlider.slider('value');
+		pitchSlider.slider('value', currentValue + sensitivityFactor);
 		return false;
 	});
 	$(document).bind('keydown', 'left', function (evt){
@@ -232,14 +235,16 @@ $(document).ready(function(){
 		{
 			var rollSlider = $('#divRollSlider');
 			var currentValue = rollSlider.slider('value');
-			rollSlider.slider('value', 500 - sensitivityFactor);
+			rollSlider.slider('value', currentValue - sensitivityFactor);
 		}
 		left_down = true;
 		return false;
 	});
 	$(document).bind('keyup', 'left', function (evt){
 		left_down = false;
-		$('#divRollSlider').slider('value', 500);
+		var rollSlider = $('#divRollSlider');
+		var currentValue = rollSlider.slider('value');
+		rollSlider.slider('value', currentValue + sensitivityFactor);
 		return false;
 	});
 	$(document).bind('keydown', 'right', function (evt){
@@ -247,18 +252,34 @@ $(document).ready(function(){
 		{
 			var rollSlider = $('#divRollSlider');
 			var currentValue = rollSlider.slider('value');
-			rollSlider.slider('value', 500 + sensitivityFactor);
+			rollSlider.slider('value', currentValue + sensitivityFactor);
 		}
 		right_down = true;
 		return false;
 	});
 	$(document).bind('keyup', 'right', function (evt){
 		right_down = false;
-		$('#divRollSlider').slider('value', 500);
+		var rollSlider = $('#divRollSlider');
+		var currentValue = rollSlider.slider('value');
+		rollSlider.slider('value', currentValue - sensitivityFactor);
 		return false;
 	});
 	
 });
+
+function increaseThrottle()
+{
+	var throttleSlider = $('#divThrottleSlider');
+	var currentValue = throttleSlider.slider('value');
+	throttleSlider.slider('value', currentValue+1);
+}
+
+function decreaseThrottle()
+{
+	var throttleSlider = $('#divThrottleSlider');
+	var currentValue = throttleSlider.slider('value');
+	throttleSlider.slider('value', currentValue-1);
+}
 
 function killEngines()
 {
@@ -361,12 +382,14 @@ function refreshInfo()
 
 function setupControls(controlName)
 {
-	$('#div' + controlName + 'Slider').slider({
+	var sliderDiv = $('#div' + controlName + 'Slider');
+
+	sliderDiv.slider({
 		range: 'min',
 		value:500,
-		min: 0,
-		max: 1000,
-		step: 5,
+		min: 400,
+		max: 600,
+		step: 1,
 		slide: function(event, ui) {
 			$('#lbl' +  controlName +  'Value').html(ui.value);
 		},
@@ -377,6 +400,16 @@ function setupControls(controlName)
 				sendControls();
 		}
 	});
-	$('#lbl' +  controlName + 'Value').html($('#div' + controlName + 'Slider').slider('value'));
-	$('#hold' +  controlName + 'Value').val($('#div' + controlName + 'Slider').slider('value') + 1000);
+	$('#lbl' +  controlName + 'Value').html(sliderDiv.slider('value'));
+	$('#hold' +  controlName + 'Value').val(sliderDiv.slider('value') + 1000);
+	
+	$('#add' + controlName).click(function() {
+		var currentValue = sliderDiv.slider('value');
+		sliderDiv.slider('value', currentValue+1);
+	});
+	
+	$('#subtract' + controlName).click(function() {
+		var currentValue = sliderDiv.slider('value');
+		sliderDiv.slider('value', currentValue-1);
+	});
 };

@@ -3,12 +3,12 @@
   <head> 
 	<head>
 	    <meta charset="utf-8"> 
-		<title>DroidCopter</title>
-		<link type="text/css" href="css/dot-luv/jquery-ui-1.8.11.custom.css" rel="stylesheet" media="screen">
+		<title>Droidcopter</title>
+		<link type="text/css" href="css/jquery-ui/jquery-ui-1.8.11.custom.css" rel="stylesheet" media="screen">
 		<link type="text/css" href="css/main.css?v1.00" rel="stylesheet">
 		<script src="js/jquery.min.js?v1.5"></script>
 		<script src="js/jquery-ui.min.js?v1.8.10"></script>
-		<script src="js/main.js?v1.04"></script>
+		<script src="js/main.js?v1.05"></script>
 		<script src="js/jquery.hotkeys.js?v0.8"></script>
 	</head>
 	<body>
@@ -44,20 +44,50 @@
 								Pitch:
 								<label id="lblPitchValue" class="sendValue"></label>
 							</h2>
-							<div id="divPitchSlider"></div>
-							<input type="hidden" id="holdPitchValue"/>
+							<ul class="sliderContainer">
+								<li>
+									<input id="subtractPitch" type="submit" value="-"></input>
+								<li>
+								<li>
+									<div id="divPitchSlider"></div>
+									<input type="hidden" id="holdPitchValue"/>
+								</li>
+								<li>
+									<input id="addPitch" type="submit" value="+"></input>
+								</li>
+							</ul>
 							<h2>
 								Roll:
 								<label id="lblRollValue" class="sendValue"></label>
 							</h2>
-							<div id="divRollSlider"></div>
-							<input type="hidden" id="holdRollValue"/>
+							<ul class="sliderContainer">
+								<li>
+									<input id="subtractRoll" type="submit" value="-"></input>
+								<li>
+								<li>
+									<div id="divRollSlider"></div>
+									<input type="hidden" id="holdRollValue"/>
+								</li>
+								<li>
+									<input id="addRoll" type="submit" value="+"></input>
+								</li>
+							</ul>
 							<h2>
 								Yaw:
 								<label id="lblYawValue" class="sendValue"></label>
 							</h2>
-							<div id="divYawSlider"></div>
-							<input type="hidden" id="holdYawValue"/>
+							<ul class="sliderContainer">
+								<li>
+									<input id="subtractYaw" type="submit" value="-"></input>
+								<li>
+								<li>
+									<div id="divYawSlider"></div>
+									<input type="hidden" id="holdYawValue"/>
+								</li>
+								<li>
+									<input id="addYaw" type="submit" value="+"></input>
+								</li>
+							</ul>
 							<br>
 							<br>
 							<input id="submitResetInputs" type="submit" value="Reset Pitch/Roll/Yaw">
@@ -65,11 +95,16 @@
 						<div id="divControlsRight">
 							<div id="divThrottleSlider"></div>
 							<br>
+							<input id="subtractThrottle" type="submit" value="-"></input>
+							<input id="addThrottle" type="submit" value="+"></input>
+							</ul>
 							<h2>
 								Throttle:
 								<label id="lblThrottleValue" class="sendValue"></label>
 							</h2>
-							(Shift - Increase, Control - Decrease)
+							Shift - Increase
+							<br>
+							Control - Decrease
 							<input type="hidden" id="holdThrottleValue"/>
 							<br>
 						</div>
@@ -95,7 +130,7 @@
 								<input id="inputSave" type="submit" value="Save Current Frame"/>
 							</div>
 							<div id="divImageHolder">
-								<img id="imgDynamic" src="webcam.jpg">
+								<img id="imgDynamic">
 							</div>
 						</div>
 					</div>

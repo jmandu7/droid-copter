@@ -39,15 +39,24 @@ body {
 	height: 300px;
 	padding-bottom: 50px;
 }
+.sliderContainer{
+	list-style-type: none;
+	margin-left: -50px;
+	height: 75px;
+}
+.sliderContainer li {
+	padding: 15px 5px;
+	float: left;
+}
 #divControls {
-	width: 350px;
+	width: 500px;
 	margin: 15px;
 	float: left;
 }
 #divControlsRight {
-	width: 275px;
+	width: 150px;
 	height: 175px;
-	padding-top: 50px;
+	padding-top: 55px;
 	margin: 15px 35px;
 	float: right;
 }
@@ -73,3 +82,9 @@ body {
 	-webkit-transform: rotate(+90deg);
 	-moz-transform: rotate(+90deg);
 }
+
+/*Jquery UI Overrides*/
+.ui-slider-horizontal { width: 275px; height: 13px; margin-top: 12px; margin-right: 35px; }
+.ui-slider-horizontal .ui-slider-handle { outline: none; border: none; width: 51px; height: 21px; top: -.3em; margin-left: -.6em; background: url(../img/slider.png); }
+.ui-slider-vertical { width: .8em; height: 100%; }
+.ui-slider-vertical .ui-slider-handle { outline: none; border: none; width: 25px; height: 51px; left: -.3em; margin-left: 0; margin-bottom: -.6em; background: url(../img/slider-vertical.png); }
