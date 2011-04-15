@@ -10,8 +10,9 @@ var up_down = false;
 var down_down = false;
 var left_down = false;
 var right_down = false;
-var ROLL_TRIM = -20;
-var PITCH_TRIM = -15;
+var ROLL_TRIM = 0;
+var PITCH_TRIM = 0;
+var stepSizeThrottle = 1;
 
 $(document).ready(function(){
 	$('#submitToggleDebug').toggle(function() {
@@ -96,6 +97,16 @@ $(document).ready(function(){
 	
 	optionsElement.change(function() {
 		sensitivityFactor = parseInt($("#inputControlSensivity option:selected").text());
+	});
+	
+	optionsElement = $('#selectThrottleStepSize');
+	optionsHTML = '<option>1</option>';
+	optionsHTML += '<option>5</option>';
+	optionsHTML += '<option>10</option>';
+	optionsElement.html(optionsHTML);
+	
+	optionsElement.change(function() {
+		stepSizeThrottle = parseInt($("#selectThrottleStepSize option:selected").text());
 	});
 	
 	$('#submitKillSwitch').click(killEngines);
@@ -271,14 +282,19 @@ function increaseThrottle()
 {
 	var throttleSlider = $('#divThrottleSlider');
 	var currentValue = throttleSlider.slider('value');
-	throttleSlider.slider('value', currentValue+1);
+	throttleSlider.slider('value', currentValue + stepSizeThrottle);
 }
 
 function decreaseThrottle()
 {
 	var throttleSlider = $('#divThrottleSlider');
 	var currentValue = throttleSlider.slider('value');
-	throttleSlider.slider('value', currentValue-1);
+	throttleSlider.slider('value', currentValue - stepSizeThrottle);
+}
+
+function changeThrottle()
+{
+
 }
 
 function killEngines()
@@ -318,7 +334,8 @@ function postDataToAndroid(data)
 		url: customHost + 'ControlReceiverServlet',
 		data: data,
 		success: function(returnData) {
-			//--nothing for now
+			$('#lblControlStatus').css('color', 'green');
+			$('#lblControlStatus').html('Live');
 		}
 	})
 	.error(function() {
