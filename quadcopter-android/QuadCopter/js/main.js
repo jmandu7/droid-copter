@@ -334,8 +334,7 @@ function postDataToAndroid(data)
 		url: customHost + 'ControlReceiverServlet',
 		data: data,
 		success: function(returnData) {
-			$('#lblControlStatus').css('color', 'green');
-			$('#lblControlStatus').html('Live');
+			//--nothing for now
 		}
 	})
 	.error(function() {
