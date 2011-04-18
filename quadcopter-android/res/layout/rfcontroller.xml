@@ -13,27 +13,27 @@
     <LinearLayout android:id="@+id/linearLayout2" android:layout_height="wrap_content" android:layout_width="match_parent"  android:orientation="horizontal">
     	<LinearLayout android:id="@+id/linearLayout2" android:layout_height="wrap_content" android:layout_width="wrap_content"  android:orientation="vertical">
     		<LinearLayout android:id="@+id/linearLayout2" android:layout_height="wrap_content" android:layout_width="wrap_content"  android:orientation="horizontal" android:layout_marginRight="10px">
-    			<Button android:id="@+id/decroll" android:text="-" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    			<Button android:id="@+id/decroll" android:text="-" android:layout_width="70px" android:layout_height="wrap_content"/>
     			<TextView android:text="Roll" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="9pt"/>
-    			<Button android:id="@+id/introll" android:text="+" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    			<Button android:id="@+id/introll" android:text="+" android:layout_width="70px" android:layout_height="wrap_content"/>
     			<TextView android:id="@+id/rollval" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
     		</LinearLayout>
     		<LinearLayout android:id="@+id/linearLayout2" android:layout_height="wrap_content" android:layout_width="wrap_content"  android:orientation="horizontal" android:layout_marginRight="10px">
-    			<Button android:id="@+id/decpitch" android:text="-" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    			<Button android:id="@+id/decpitch" android:text="-" android:layout_width="70px" android:layout_height="wrap_content"/>
     			<TextView android:text="Pitch" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="9pt"/>
-    			<Button android:id="@+id/intpitch" android:text="+" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    			<Button android:id="@+id/intpitch" android:text="+" android:layout_width="70px" android:layout_height="wrap_content"/>
     			<TextView android:id="@+id/pitchval" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
     		</LinearLayout>
     		<LinearLayout android:id="@+id/linearLayout2" android:layout_height="wrap_content" android:layout_width="wrap_content"  android:orientation="horizontal" android:layout_marginRight="10px">
-    			<Button android:id="@+id/decyaw" android:text="-" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    			<Button android:id="@+id/decyaw" android:text="-" android:layout_width="70px" android:layout_height="wrap_content"/>
     			<TextView android:text="Yaw" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="9pt"/>
-    			<Button android:id="@+id/incyaw" android:text="+" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    			<Button android:id="@+id/incyaw" android:text="+" android:layout_width="70px" android:layout_height="wrap_content"/>
     			<TextView android:id="@+id/yawval" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
     		</LinearLayout>
     		<LinearLayout android:id="@+id/linearLayout2" android:layout_height="wrap_content" android:layout_width="wrap_content"  android:orientation="horizontal" android:layout_marginRight="10px">
-    			<Button android:id="@+id/decthrottle" android:text="-" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    			<Button android:id="@+id/decthrottle" android:text="-" android:layout_width="70px" android:layout_height="wrap_content"/>
     			<TextView android:text="Throttle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="9pt"/>
-    			<Button android:id="@+id/intthrottle" android:text="+" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    			<Button android:id="@+id/intthrottle" android:text="+" android:layout_width="70px" android:layout_height="wrap_content"/>
     			<TextView android:id="@+id/throttleval" android:layout_width="50px" android:layout_height="wrap_content"/>
     		</LinearLayout>
     	</LinearLayout>
@@ -59,6 +59,8 @@
     	    <TextView android:text="Step:" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="9pt"/>
     	    <TextView android:id="@+id/stepSize" android:text="1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="9pt"/>
     	    <Button android:text="+" android:id="@+id/incStep" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+    	    <Button android:text="Set Trim" android:id="@+id/setTrim" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+    	    <Button android:text="back" android:id="@+id/btnBack" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
     </LinearLayout>
   
 </LinearLayout>

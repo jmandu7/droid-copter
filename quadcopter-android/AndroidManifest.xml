@@ -22,7 +22,7 @@
 			I did this because we don't ever want this part to crash.
 			So . . . by seperating it, we make so any other part of our system
 			crasing will not cause this to crash -->
-		<service android:enabled="true" android:permission="android.permission.INTERNET" android:name=".background.BackgroundService" android:exported="true" android:process=":WebServer">
+		<service android:enabled="true" android:permission="android.permission.INTERNET" android:name=".background.BackgroundService" android:exported="true" android:process=":BackgroundService">
 	      	<intent-filter>
 	        	<action android:name="com.quadcopter.background.IBackgroundService"/>
 	       	</intent-filter>
