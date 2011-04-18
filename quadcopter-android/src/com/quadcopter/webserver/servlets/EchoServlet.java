@@ -1,20 +1,17 @@
 package com.quadcopter.webserver.servlets;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import org.apache.http.Header;
-import org.apache.http.HttpException;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.impl.DefaultHttpServerConnection;
-import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 
 public class EchoServlet extends Servlet{
 
 	@Override
-	public HttpResponse runServlet(DefaultHttpServerConnection serverConnection, HttpRequest request) 
+	public void runServlet(HttpRequest request, HttpResponse response) 
 	{	
 		Header[] headers = request.getAllHeaders();
 		String ret = request.getRequestLine().getUri() + "\n";
@@ -23,26 +20,20 @@ public class EchoServlet extends Servlet{
 			ret=headers[i].getName() + "=" + headers[i].getValue() + "\n";
 		}	
 		
-		BasicHttpEntityEnclosingRequest enclosingRequest = new BasicHttpEntityEnclosingRequest(
-				request.getRequestLine());
+		HttpEntity entity = ((HttpEntityEnclosingRequest)request).getEntity();
+		InputStream s;
 		StringBuffer form = new StringBuffer();
 		try {
-			serverConnection.receiveRequestEntity(enclosingRequest);
-			InputStream input = enclosingRequest.getEntity().getContent();
-			InputStreamReader reader = new InputStreamReader(input);
-			
-			while (reader.ready()) {
-				form.append((char) reader.read());
-			}
-		} catch (HttpException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
+			s = entity.getContent();		
+			int b;
+			while ((b=s.read())!=-1)
+				form.append((char)b);
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		return getHTTPSuccessResponse(ret + form.toString());
+		setHTTPSuccessResponse(response, ret + form.toString());
 	}
 
 }

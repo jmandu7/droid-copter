@@ -1,15 +1,9 @@
 package com.quadcopter.webserver.servlets;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URLDecoder;
 
-import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.impl.DefaultHttpServerConnection;
-import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,47 +22,34 @@ public class ControlReceiverServlet extends Servlet
 	}
 
 	@Override
-	public HttpResponse runServlet(DefaultHttpServerConnection serverConnection, HttpRequest request) 
+	public void runServlet(HttpRequest request, HttpResponse response) 
 	{
-		BasicHttpEntityEnclosingRequest enclosingRequest = new BasicHttpEntityEnclosingRequest(request.getRequestLine());
-		StringBuffer form = new StringBuffer();
 		String failVal = "";
 		String dataDecoded = null;
 		String formData = null;
 		try {
-			serverConnection.receiveRequestEntity(enclosingRequest);
-			InputStream input = enclosingRequest.getEntity().getContent();
-			InputStreamReader reader = new InputStreamReader(input);
 			
-			while (reader.ready()) {
-				form.append((char) reader.read());
-			}
-			
-			formData = form.toString();
-			if ("".equals(formData))
-				System.out.println("test error");
+			formData = getHTTPPostBody(request);
+
 			dataDecoded = URLDecoder.decode(formData);
 			//data.substring(data.indexOf("data="));dataDecoded
 			JSONObject data = new JSONObject(dataDecoded);
 			
 			if (data!=null&&handleRequest(data))
 			{
-				return getHTTPSuccessResponse("Success!");
+				setHTTPSuccessResponse(response, "Success!");
+				return;
 			} else
 			{
-				return getHTTPFailureResponse("form data was null or there was an error handling request");
+				setHTTPFailureResponse(response, "form data was null or there was an error handling request");
 			}
-			
-		} catch (HttpException e) {
-			failVal = e.toString();
-		} catch (IOException e) {
-			failVal = e.toString();
 		} catch (JSONException e) {
 			failVal = e.toString();
 		}
 		failVal += " formData=\"" + (formData!=null?formData:"null") + "\"";
 		failVal += " dataDecoded=\"" + (dataDecoded!=null?dataDecoded:"null") + "\"";
-		return getHTTPFailureResponse(failVal);
+		failVal += " request.getRequestLine()=\"" + request.getRequestLine() + "\"";
+		setHTTPFailureResponse(response, failVal);
 	}
 	
 	private boolean handleRequest(JSONObject request) throws JSONException

@@ -64,8 +64,11 @@ public class BackgroundService extends Service
 				SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 				int port = settings.getInt("port", DEFAULT_PORT);
 				try {
+					//TODO add cookies back in
+//					mWebServerThread = new WebServerThread(BackgroundService.this, settings,
+//							new CookiesDatabaseOpenHelper(BackgroundService.this).getWritableDatabase(), port);
 					mWebServerThread = new WebServerThread(BackgroundService.this, settings,
-							new CookiesDatabaseOpenHelper(BackgroundService.this).getWritableDatabase(), port);
+							null, port);
 					//This command ensures that this thread will be closed 
 					//if the the service using this thread crashes.
 					mWebServerThread.setDaemon(true);

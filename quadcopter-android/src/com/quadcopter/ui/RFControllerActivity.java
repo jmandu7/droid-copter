@@ -1,7 +1,9 @@
 package com.quadcopter.ui;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
@@ -15,6 +17,8 @@ import com.quadcopter.background.hardware.BluetoothCommunication;
 
 public class RFControllerActivity extends Activity implements OnClickListener, OnSeekBarChangeListener
 {
+	private static final int THROTTLE_STEP_SIZE = 10;
+	
 	Button arm;
 	Button disarm;
 	Button acro;
@@ -45,6 +49,19 @@ public class RFControllerActivity extends Activity implements OnClickListener, O
 	TextView lblPitch;
 	TextView lblYaw;
 	TextView lblThrottle;
+	
+	Button setTrim;
+	
+	Button back;
+	
+	int trimPitch=0;
+	int trimRoll=0;
+	int trimYaw=0;
+	
+	int oldTrimPitch=0;
+	int oldTrimRoll=0;
+	int oldTrimYaw=0;
+	
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -107,6 +124,11 @@ public class RFControllerActivity extends Activity implements OnClickListener, O
         decStep.setOnClickListener(this);
         lblStepSize = (TextView) findViewById(R.id.stepSize);
         
+        setTrim = (Button)findViewById(R.id.setTrim);
+        setTrim.setOnClickListener(this);
+        
+        back = (Button)findViewById(R.id.btnBack);
+        back.setOnClickListener(this);
     }
 
 	@Override
@@ -120,9 +142,21 @@ public class RFControllerActivity extends Activity implements OnClickListener, O
 		} else if (v==stable)
 		{
 			BluetoothCommunication.sendMessageToDevice(this, 'M', "0");
+//			oldTrimPitch = trimPitch;
+//			oldTrimYaw = trimYaw;
+//			oldTrimRoll = trimRoll;
+//			roll.setProgress(500);
+//			pitch.setProgress(500);
+//			yaw.setProgress(500);
 		} else if (v==acro)
 		{
 			BluetoothCommunication.sendMessageToDevice(this, 'M', "1");
+			trimPitch = oldTrimPitch;
+			trimYaw = oldTrimYaw;
+			trimRoll = oldTrimRoll;
+			roll.setProgress(500+trimRoll);
+			pitch.setProgress(500+trimPitch);
+			yaw.setProgress(500+trimYaw);
 		} else if (v==kill)
 		{
 			BluetoothCommunication.sendMessageToDevice(this, 'R', "1500");
@@ -136,27 +170,27 @@ public class RFControllerActivity extends Activity implements OnClickListener, O
 			BluetoothCommunication.sendMessageToDevice(this, 'D', "");
 		} else if (v==reset)
 		{
-			roll.setProgress(500);
-			pitch.setProgress(500);
-			yaw.setProgress(500);
+			roll.setProgress(500+trimRoll);
+			pitch.setProgress(500+trimPitch);
+			yaw.setProgress(500+trimYaw);
 		} else if (v==incRoll)
 		{
-			roll.setProgress(roll.getProgress()+stepSize);
+			roll.setProgress(roll.getProgress()+stepSize*4);
 		} else if (v==decRoll)
 		{
-			roll.setProgress(roll.getProgress()-stepSize);
+			roll.setProgress(roll.getProgress()-stepSize*4);
 		} else if (v==incPitch)
 		{
-			pitch.setProgress(pitch.getProgress()+stepSize);
+			pitch.setProgress(pitch.getProgress()+stepSize*4);
 		} else if (v==decPitch)
 		{
-			pitch.setProgress(pitch.getProgress()-stepSize);
+			pitch.setProgress(pitch.getProgress()-stepSize*4);
 		} else if (v==incYaw)
 		{
-			yaw.setProgress(yaw.getProgress()+stepSize);
+			yaw.setProgress(yaw.getProgress()+stepSize*4);
 		} else if (v==decYaw)
 		{
-			yaw.setProgress(yaw.getProgress()-stepSize);	
+			yaw.setProgress(yaw.getProgress()-stepSize*4);	
 		} else if (v==incThrottle)
 		{
 			throttle.setProgress(throttle.getProgress()+stepSize);
@@ -171,24 +205,37 @@ public class RFControllerActivity extends Activity implements OnClickListener, O
 		{
 			stepSize--;
 			lblStepSize.setText(stepSize+"");
+		} else if (v==setTrim)
+		{
+			trimPitch = pitch.getProgress() - 500;
+			trimRoll = roll.getProgress() - 500;
+			trimYaw = yaw.getProgress() - 500;
+		} else if (v==back)
+		{
+			startActivity(new Intent(this, QuadCopterActivity.class));
 		}
 	}
 
+	
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) 
 	{
+		int startVal = 1375;
 		if (seekBar == roll)
 		{
-			BluetoothCommunication.sendMessageToDevice(this, 'R', String.valueOf(progress+1000));
-			lblRoll.setText(progress+1000+"");
+			progress = progress/4;	
+			BluetoothCommunication.sendMessageToDevice(this, 'R', String.valueOf(progress+startVal));
+			lblRoll.setText(progress+startVal+"");
 		} else if (seekBar == pitch)
 		{
-			BluetoothCommunication.sendMessageToDevice(this, 'P', String.valueOf(progress+1000));
-			lblPitch.setText(progress+1000+"");
+			progress = progress/4;	
+			BluetoothCommunication.sendMessageToDevice(this, 'P', String.valueOf(progress+startVal));
+			lblPitch.setText(progress+startVal+"");
 		} else if (seekBar == yaw)
 		{
-			BluetoothCommunication.sendMessageToDevice(this, 'Y', String.valueOf(progress+1000));
-			lblYaw.setText(progress+1000+"");
+			progress = progress/4;
+			BluetoothCommunication.sendMessageToDevice(this, 'Y', String.valueOf(progress+startVal));
+			lblYaw.setText(progress+startVal+"");
 		} else if (seekBar == throttle)
 		{
 			BluetoothCommunication.sendMessageToDevice(this, 'T', String.valueOf(progress+1000));
@@ -204,7 +251,76 @@ public class RFControllerActivity extends Activity implements OnClickListener, O
 
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
-		// TODO Auto-generated method stub
+		if (seekBar == roll)
+		{
+			seekBar.setProgress(500+trimRoll);
+		} else if (seekBar == pitch)
+		{
+			seekBar.setProgress(500+trimPitch);
+		} else if (seekBar == yaw)
+		{
+			seekBar.setProgress(500+trimYaw);
+		}
+	}
+
+	boolean pp;
+	boolean pm;
+	boolean rp;
+	boolean rm;
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		
+		if (keyCode == KeyEvent.KEYCODE_E&&pp)
+		{
+			pp = false;
+			pitch.setProgress(pitch.getProgress()-stepSize*4);
+		} else if (keyCode == KeyEvent.KEYCODE_X&&pm)
+		{
+			pm = false;
+			pitch.setProgress(pitch.getProgress()+stepSize*4);
+		} else if (keyCode == KeyEvent.KEYCODE_S&&rm)
+		{
+			rm = false;
+			roll.setProgress(roll.getProgress()+stepSize*4);
+		} else if (keyCode == KeyEvent.KEYCODE_F&&rp)
+		{
+			rp = false;
+			roll.setProgress(roll.getProgress()-stepSize*4);
+		} else
+		{
+			return super.onKeyDown(keyCode, event);
+		}
+		return true;
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_P)
+		{
+			throttle.setProgress(throttle.getProgress()+THROTTLE_STEP_SIZE);
+		} else if (keyCode == KeyEvent.KEYCODE_PERIOD)
+		{
+			throttle.setProgress(throttle.getProgress()-THROTTLE_STEP_SIZE);
+		} else if (keyCode == KeyEvent.KEYCODE_E&&!pp)
+		{
+			pp = true;
+			pitch.setProgress(pitch.getProgress()+stepSize*4);
+		} else if (keyCode == KeyEvent.KEYCODE_X&&!pm)
+		{
+			pm = true;
+			pitch.setProgress(pitch.getProgress()-stepSize*4);
+		} else if (keyCode == KeyEvent.KEYCODE_S&&!rm)
+		{
+			rm = true;
+			roll.setProgress(roll.getProgress()-stepSize*4);
+		} else if (keyCode == KeyEvent.KEYCODE_F&&!rp)
+		{
+			rp = true;
+			roll.setProgress(roll.getProgress()+stepSize*4);
+		} else
+		{
+			return super.onKeyDown(keyCode, event);
+		}
+		return true;
 	}
 }

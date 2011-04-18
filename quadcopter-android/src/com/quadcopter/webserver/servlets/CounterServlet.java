@@ -2,7 +2,6 @@ package com.quadcopter.webserver.servlets;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.impl.DefaultHttpServerConnection;
 
 import android.content.Context;
 
@@ -16,10 +15,10 @@ public class CounterServlet extends Servlet{
 	}
 
 	@Override
-	public HttpResponse runServlet(DefaultHttpServerConnection serverConnection, HttpRequest request) 
+	public void runServlet(HttpRequest request, HttpResponse response) 
 	{
 		count++;
-		return getHTTPSuccessResponse("" + count);
+		setHTTPSuccessResponse(response, "" + count);
 	}
 
 }

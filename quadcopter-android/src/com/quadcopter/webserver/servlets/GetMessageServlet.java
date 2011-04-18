@@ -4,7 +4,6 @@ import java.util.LinkedList;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.impl.DefaultHttpServerConnection;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -39,12 +38,12 @@ public class GetMessageServlet extends Servlet{
 	}
 
 	@Override
-	public synchronized HttpResponse runServlet(DefaultHttpServerConnection serverConnection, HttpRequest request) 
+	public void runServlet(HttpRequest request, HttpResponse response) 
 	{
 		String ret="";
 		while (!msgQueue.isEmpty())
 			ret += msgQueue.poll() + "\n";
-		return getHTTPSuccessResponse(ret);
+		setHTTPSuccessResponse(response, ret);
 	}
 
 }

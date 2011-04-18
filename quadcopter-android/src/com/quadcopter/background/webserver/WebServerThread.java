@@ -9,23 +9,37 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URLConnection;
 import java.util.Random;
+
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.RequestLine;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.DefaultConnectionReuseStrategy;
+import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.impl.DefaultHttpServerConnection;
-import org.apache.http.message.BasicHttpEntityEnclosingRequest;
-import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.params.BasicHttpParams;
-
-import com.quadcopter.background.BackgroundService;
-import com.quadcopter.webserver.servlets.Servlet;
-import com.quadcopter.webserver.servlets.ServletLoader;
+import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.BasicHttpProcessor;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpRequestHandler;
+import org.apache.http.protocol.HttpRequestHandlerRegistry;
+import org.apache.http.protocol.HttpService;
+import org.apache.http.protocol.ResponseConnControl;
+import org.apache.http.protocol.ResponseContent;
+import org.apache.http.protocol.ResponseDate;
+import org.apache.http.protocol.ResponseServer;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -35,7 +49,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
 import android.util.Log;
 
-public class WebServerThread extends Thread 
+import com.quadcopter.background.BackgroundService;
+import com.quadcopter.webserver.servlets.Servlet;
+import com.quadcopter.webserver.servlets.ServletLoader;
+
+public class WebServerThread extends Thread implements HttpRequestHandler
 {
 	private static final String TAG = "WebServerThread";
 	
@@ -58,6 +76,13 @@ public class WebServerThread extends Thread
 	
 	private ServletLoader servletLoader = null;
 	
+    private BasicHttpProcessor httpproc = null;
+    private BasicHttpContext httpContext = null;
+    private HttpService httpService = null;
+    private HttpRequestHandlerRegistry registry = null;
+    private final HttpParams params; 
+    
+	
 	public void setWebCamImg(byte[] img)
 	{
 		webCameraImg = img;
@@ -75,11 +100,11 @@ public class WebServerThread extends Thread
 	{
 		mContext = context;
 		mPort = port;
-		mServerSocket = new ServerSocket(mPort, 10);
+		mServerSocket = new ServerSocket(mPort);
 		mServerSocket.setReuseAddress(true);
 		mSharedPreferences = sharedPreferences;
-		mCookiesDatabase = cookiesDatabase;
-		deleteOldCookies();
+		//mCookiesDatabase = cookiesDatabase;
+		//deleteOldCookies();
 		
 		//Make sure we have an instance of servletLoader 
 		//ServletLoader will load an instance of a servlet
@@ -88,14 +113,37 @@ public class WebServerThread extends Thread
 		servletLoader = new ServletLoader();
 		//some servlets need to be loaded as soon as we start
 		//the web server. So . . . we will load them here.
-		Servlet servlet = servletLoader.loadServlet(SERVLET_PACKAGE + "." + "CounterServlet");
+		Servlet servlet;
+		servlet = servletLoader.loadServlet(SERVLET_PACKAGE + "." + "CounterServlet");
 		servlet.setupServlet(context);
-		servlet = servletLoader.loadServlet(SERVLET_PACKAGE + "." + "GetMessageServlet");
-		servlet.setupServlet(context);
-		servlet = servletLoader.loadServlet(SERVLET_PACKAGE + "." + "SendMessageServlet");
-		servlet.setupServlet(context);
+//		servlet = servletLoader.loadServlet(SERVLET_PACKAGE + "." + "GetMessageServlet");
+//		servlet.setupServlet(context);
+//		servlet = servletLoader.loadServlet(SERVLET_PACKAGE + "." + "SendMessageServlet");
+//		servlet.setupServlet(context);
 		servlet = servletLoader.loadServlet(SERVLET_PACKAGE + "." + "ControlReceiverServlet");
 		servlet.setupServlet(context);
+		
+		
+		//TODO - may delete this stuff
+		//use this to handle the request
+		httpproc = new BasicHttpProcessor();
+        httpContext = new BasicHttpContext();
+        httpproc.addInterceptor(new ResponseDate());
+        httpproc.addInterceptor(new ResponseServer());
+        httpproc.addInterceptor(new ResponseContent());
+        httpproc.addInterceptor(new ResponseConnControl());
+        httpService = new HttpService(httpproc, new DefaultConnectionReuseStrategy(),new DefaultHttpResponseFactory());
+        registry = new HttpRequestHandlerRegistry();
+        registry.register("*", this);   
+        httpService.setHandlerResolver(registry);
+        this.params = new BasicHttpParams();
+        this.params
+            .setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000)
+            .setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024)
+            .setBooleanParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false)
+            .setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true)
+            .setParameter(CoreProtocolPNames.ORIGIN_SERVER, "HttpComponents/1.1");
+        httpService.setParams(params);
 	}
 
 	@Override
@@ -113,14 +161,34 @@ public class WebServerThread extends Thread
 			try {
 				final Socket socket = mServerSocket.accept();
 				Log.d(TAG, "Socket accepted");
-				Thread t = new Thread() {
+                
+				final DefaultHttpServerConnection serverConnection = new DefaultHttpServerConnection();
+				serverConnection.bind(socket, new BasicHttpParams());   
+				
+				Thread t = new Thread(){
 					@Override
 					public void run() {
-						handleRequest(socket);
-					}
+						
+						try {
+							while (!Thread.interrupted() && serverConnection.isOpen()) {
+								httpService.handleRequest(serverConnection, httpContext);
+			                }
+						} catch (IOException e) {
+		                    e.printStackTrace();
+		                } catch (HttpException e) {
+		                	e.printStackTrace();
+		                } finally
+		                {
+		                	try {
+								serverConnection.shutdown();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+		                }
+						//super.run();
+					}	
 				};
-				//This command ensures that this thread will be closed 
-				//if the the parent thread crashes.
 				t.setDaemon(true);
 				t.start();
 			} catch (IOException e) {
@@ -134,20 +202,17 @@ public class WebServerThread extends Thread
 		}
 	}
 
-	/* Handles a single request. */
-	public void handleRequest(Socket socket) 
-	{
-		try {
-			DefaultHttpServerConnection serverConnection = new DefaultHttpServerConnection();
-			serverConnection.bind(socket, new BasicHttpParams());
-			HttpRequest request = serverConnection.receiveRequestHeader();
+	@Override
+	public void handle(HttpRequest request, HttpResponse response,
+			HttpContext context) throws HttpException, IOException {
+		try
+		{
 			RequestLine requestLine = request.getRequestLine();
-
+			
 			/* First make sure user is logged in if that is required. */
 			boolean loggedIn = true;
 			//TODO set to false to require login
-			if (mSharedPreferences.getBoolean(
-					BackgroundService.PREFS_REQUIRE_LOGIN, true)) {
+			if (mSharedPreferences.getBoolean(BackgroundService.PREFS_REQUIRE_LOGIN, true)) {
 				/* Does the user have a valid cookie? */
 				Header cookiesHeader = request.getFirstHeader("Cookie");
 				if (cookiesHeader != null) {
@@ -163,21 +228,19 @@ public class WebServerThread extends Thread
 			if (!loggedIn) {
 				/* Could be the result of the login form. */
 				if (requestLine.getUri().equals("/login")) {
-					handleLoginRequest(serverConnection, request, requestLine);
+					handleLoginRequest(request, response, requestLine);
 				} else {
-					sendHTMLPage("login/form.html", serverConnection);
+					sendHTMLPage("login/form.html", response);
 				}
 			} else if (requestLine.getUri().equals("/")) {
 				Log.i(TAG, "Default Page");
-				sendHTMLPage("default.html", serverConnection);
+				sendHTMLPage("default.html", response);
 			} else if (requestLine.getUri().startsWith("/webcam.jpg")) {
 				Log.i(TAG, "Sending WebCam Image");
-				sendWebCamImage(serverConnection);
+				sendWebCamImage(response);
 			} else {
-				doSomeSweetAction(serverConnection, request, requestLine);
+				doSomeSweetAction(request, response, requestLine);
 			}
-			serverConnection.flush();
-			serverConnection.close();
 		} catch (IOException e) {
 			Log.e(TAG, "Problem with socket " + e.toString());
 		} catch (HttpException e) {
@@ -197,11 +260,10 @@ public class WebServerThread extends Thread
 	 * @throws IOException
 	 */
 	private void doSomeSweetAction(
-				DefaultHttpServerConnection serverConnection, 
 				HttpRequest request,
+				HttpResponse response,
 				RequestLine requestLine) throws HttpException, IOException
 	{
-		String data = null;
 		//The string that is to the left of the question mark
 		//and without the leading slash is the page name
 		String uri = requestLine.getUri();
@@ -219,58 +281,56 @@ public class WebServerThread extends Thread
 		if (servlet==null)
 		{
 			
-			data = readFileFromHomeDirectory(pageName);
-			if (data!=null)
+			//data = readFileFromHomeDirectory(pageName);
+			File f = new File(Environment.getExternalStorageDirectory()+"/QuadCopter/" + pageName);
+			if(f.exists())
 			{
+				FileInputStream fis = new FileInputStream(f);
+				String contentType = URLConnection.guessContentTypeFromStream(fis);
+				response.setEntity(new InputStreamEntity(fis, f.length()));
+				response.setHeader("Content-Type", contentType);
 				Log.i(TAG, "Sending page - " + pageName);
-				sendResponse(Servlet.getHTTPSuccessResponse(data), serverConnection);
 			} else
 			{
 				//if data is null then we couldn't load from servlet or file. So
 				//we send the page not found.
 				Log.i(TAG, "No action for " + requestLine.getUri());
-				sendNotFound(serverConnection);
+				sendNotFound(response);
 			}
 		} else 
 		{
 			//run servlet
 			Log.i(TAG, "Runing servlet - " + SERVLET_PACKAGE + "." + pageName);
-			HttpResponse response = servlet.runServlet(serverConnection, request);
-			//send response
-			sendResponse(response, serverConnection);
+			servlet.runServlet(request, response);
 		}
 	}
 
 	private void handleLoginRequest(
-			DefaultHttpServerConnection serverConnection, HttpRequest request,
+			HttpRequest request,
+			HttpResponse response,
 			RequestLine requestLine) throws HttpException, IOException 
 	{
 
-		BasicHttpEntityEnclosingRequest enclosingRequest = new BasicHttpEntityEnclosingRequest(
-				request.getRequestLine());
-		serverConnection.receiveRequestEntity(enclosingRequest);
-
-		InputStream input = enclosingRequest.getEntity().getContent();
-		InputStreamReader reader = new InputStreamReader(input);
-
+		HttpEntity entity = ((HttpEntityEnclosingRequest)request).getEntity();
+		InputStream s = entity.getContent();
 		StringBuffer form = new StringBuffer();
-		while (reader.ready()) {
-			form.append((char) reader.read());
-		}
+		int b;
+		while ((b=s.read())!=-1)
+			form.append((char)b);
+		
 		String password = form.substring(form.indexOf("=") + 1);
 		if (password.equals(mSharedPreferences.getString(
 				BackgroundService.PREFS_PASSWORD, "Pa%24%24word"))) {
-			HttpResponse response = new BasicHttpResponse(
-					new HttpVersion(1, 1), 302, "Found");
+			response.setStatusLine(new HttpVersion(1, 1), 302, "Found");
+			
 			response.addHeader("Location", "/");
 			response.addHeader("Set-Cookie", "id=" + createCookie());
 			
-			sendHTMLPage("login/success.html", response, serverConnection);
+			sendHTMLPage("login/success.html", response);
 		} else {
-			HttpResponse response = new BasicHttpResponse(
-					new HttpVersion(1, 1), 401, "Unauthorized");
+			response.setStatusLine(new HttpVersion(1, 1), 401, "Unauthorized");
 			
-			sendHTMLPage("login/fail.html", response, serverConnection);
+			sendHTMLPage("login/fail.html", response);
 		}
 	}
 
@@ -305,56 +365,38 @@ public class WebServerThread extends Thread
 				+ (int) System.currentTimeMillis() / 1000 });
 	}
 
-	private void sendNotFound(DefaultHttpServerConnection serverConnection)
+	private void sendNotFound(HttpResponse response)
 			throws UnsupportedEncodingException, HttpException, IOException 
 	{
-		HttpResponse response = new BasicHttpResponse(new HttpVersion(1, 1),
-				404, "NOT FOUND");
+		//HttpResponse response
+		response.setStatusLine(new HttpVersion(1, 1),404, "NOT FOUND");
 		response.setEntity(new StringEntity("NOT FOUND"));
-		serverConnection.sendResponseHeader(response);
-		serverConnection.sendResponseEntity(response);
+		response.addHeader("Content-Type", "text/html");
 	}
 	
-	private void sendHTMLPage(String page,
-			DefaultHttpServerConnection serverConnection)
+	private void sendHTMLPage(String page, 
+			Header header,
+			HttpResponse response)
 			throws UnsupportedEncodingException, HttpException, IOException 
 	{
-		sendHTMLPage(page, (Header)null, serverConnection);
-	}
-	
-	private void sendHTMLPage(String page, Header header,
-			DefaultHttpServerConnection serverConnection)
-			throws UnsupportedEncodingException, HttpException, IOException 
-	{
-		HttpResponse response = new BasicHttpResponse(new HttpVersion(1, 1), 200,"OK");
+		response.setStatusLine(new HttpVersion(1, 1), 200,"OK");
 		String body = readFileFromHomeDirectory(page);
 		response.setEntity(new StringEntity(body));
-		sendResponse(response, serverConnection);
+		response.addHeader("Content-Type", "text/html");
 	}
 	
-	private void sendHTMLPage(String page, HttpResponse response,
-			DefaultHttpServerConnection serverConnection)
+	private void sendHTMLPage(String page, HttpResponse response)
 			throws UnsupportedEncodingException, HttpException, IOException 
 	{
 		String body = readFileFromHomeDirectory(page);
 		response.setEntity(new StringEntity(body));
-		sendResponse(response, serverConnection);
+		response.addHeader("Content-Type", "text/html");
 	}
 	
-	private void sendResponse(HttpResponse response,
-			DefaultHttpServerConnection serverConnection)
-			throws HttpException, IOException 
+	private void sendWebCamImage(HttpResponse response) throws IOException, HttpException 
 	{
-		serverConnection.sendResponseHeader(response);
-		serverConnection.sendResponseEntity(response);
-	}
-	
-	private void sendWebCamImage(DefaultHttpServerConnection serverConnection) throws IOException, HttpException 
-	{
-		 HttpResponse response = new BasicHttpResponse(new HttpVersion(1, 1), 200,"OK");
+		 response.setStatusLine(new HttpVersion(1, 1), 200,"OK");
 		 addImageEntity(webCameraImg, response);
-		 serverConnection.sendResponseHeader(response);
-		 serverConnection.sendResponseEntity(response);
 	}
 	
 	private void addImageEntity(byte[] img, HttpResponse response) throws IOException 
@@ -364,23 +406,10 @@ public class WebServerThread extends Thread
 		if (img!=null)
 		{
 			response.addHeader("Content-Type", contentType);
-			response.addHeader("Content-Length", "" + img.length);
+			//response.addHeader("Content-Length", "" + img.length);
 			response.setEntity(new ByteArrayEntity(img));
 		}
 	}
-
-//	private void sendLoginForm(DefaultHttpServerConnection serverConnection,
-//			RequestLine requestLine) throws UnsupportedEncodingException,
-//			HttpException, IOException 
-//	{
-//		HttpResponse response = new BasicHttpResponse(new HttpVersion(1, 1),
-//				200, "OK");
-//		response.setEntity(new StringEntity(getHTMLHeader()
-//						+ "<p>Password Required</p>" + getLoginForm()
-//						+ getHTMLFooter()));
-//		serverConnection.sendResponseHeader(response);
-//		serverConnection.sendResponseEntity(response);
-//	}
 
 	public static String readFileFromHomeDirectory(String strFileName)
 	{

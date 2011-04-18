@@ -2,7 +2,6 @@ package com.quadcopter.webserver.servlets;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.impl.DefaultHttpServerConnection;
 
 import android.content.Context;
 
@@ -19,7 +18,7 @@ public class SendMessageServlet extends Servlet
 	}
 
 	@Override
-	public HttpResponse runServlet(DefaultHttpServerConnection serverConnection, HttpRequest request) 
+	public void runServlet(HttpRequest request, HttpResponse response) 
 	{
 		String msg = request.getRequestLine().getUri();
 		msg = msg.contains("?")?msg.split("\\?")[1]:null;
@@ -27,10 +26,10 @@ public class SendMessageServlet extends Servlet
 		if (msg!=null)
 		{
 			BluetoothCommunication.sendMessageToDevice(mContext, msg.charAt(0), msg);
-			return getHTTPSuccessResponse("Success!");
+			setHTTPSuccessResponse(response, "Success!");
 		} else
 		{
-			return getHTTPSuccessResponse("Failure!");
+			setHTTPFailureResponse(response, "Failure!");
 		}
 	}
 
