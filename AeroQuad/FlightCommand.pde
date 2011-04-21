@@ -1,5 +1,5 @@
 /*
-  AeroQuad v2.1 - January 2011
+  AeroQuad v2.4 - April 2011
   www.AeroQuad.com
   Copyright (c) 2011 Ted Carancho.  All rights reserved.
   An Open Source Arduino based multicopter.
@@ -21,17 +21,17 @@
 // FlightCommand.pde is responsible for decoding transmitter stick combinations
 // for setting up AeroQuad modes such as motor arming and disarming
 
-// Roll, pitch, yaw, throttle, mode, arm/disarm, calibrate == 0, 1, 2, 3, 4, 5, 6)
-
 void readPilotCommands() {
   receiver.read();
   // Read quad configuration commands from transmitter when throttle down
   if (receiver.getRaw(THROTTLE) < MINCHECK) {
+    
     zeroIntegralError();
     throttleAdjust = 0;
     //receiver.adjustThrottle(throttleAdjust);
     // Disarm motors (left stick lower left corner)
     if (receiver.getRaw(5) == 0 && armed == ON) {
+     // Serial.println("DisArming");
       armed = OFF;
       motors.commandAllMotors(MINCOMMAND);
       #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
@@ -80,6 +80,7 @@ void readPilotCommands() {
     
     // Arm motors (left stick lower right corner)
     if (receiver.getRaw(5) == 1 && armed == OFF) {
+     // Serial.println("Arming");
       zeroIntegralError();
       armed = ON;
       #if defined(APM_OP_CHR6DM) || defined(ArduCopter) 
@@ -128,26 +129,26 @@ void readPilotCommands() {
      }
    #endif
   
-  #ifdef AltitudeHold            // Not enabled currently
-    
+  #ifdef AltitudeHold
    if (receiver.getRaw(AUX) < 1750) {
-      if (storeAltitude == ON) {
-        holdAltitude = altitude.getData();
-        holdThrottle = receiver.getData(THROTTLE);
-        PID[ALTITUDE].integratedError = 0;
-        accel.setOneG(accel.getFlightData(ZAXIS));
-        storeAltitude = OFF;
-      }
-      altitudeHold = ON;
-    }
-    else {
-      storeAltitude = ON;
-      altitudeHold = OFF;
-    }
+     if (altitudeHold != ALTPANIC ) {  // check for special condition with manditory override of Altitude hold
+       if (storeAltitude == ON) {
+         holdAltitude = altitude.getData();
+         holdThrottle = receiver.getData(THROTTLE);
+         PID[ALTITUDE].integratedError = 0;
+         PID[ALTITUDE].lastPosition = holdAltitude;  // add to initialize hold position on switch turn on.
+         //accel.setOneG(accel.getFlightData(ZAXIS));  // AKA need to fix this
+         storeAltitude = OFF;
+       }
+       altitudeHold = ON;
+     }
+     // note, Panic will stay set until Althold is toggled off/on
+   } 
+   else {
+     storeAltitude = ON;
+     altitudeHold = OFF;
+   }
   #endif
-  
-  // Use for correcting gyro drift with v2.0 Shield
-  //gyro.setReceiverYaw(receiver.getData(YAW));
 }
 
 
