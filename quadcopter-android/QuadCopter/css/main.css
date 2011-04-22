@@ -39,6 +39,10 @@ body {
 	height: 300px;
 	padding-bottom: 50px;
 }
+#divMapCanvas {
+	height: 500px;
+	width: 95%;
+}
 .sliderContainer{
 	list-style-type: none;
 	margin-left: -50px;
@@ -73,14 +77,8 @@ body {
 	display: none;
 }
 #divImageHolder {
-	width: 480;
-	height: 640;
-	margin-top: 150px;
-	margin-left: -50px;
-}
-#imgDynamic {
-	-webkit-transform: rotate(+90deg);
-	-moz-transform: rotate(+90deg);
+	width: 640;
+	height: 480;
 }
 
 /*Jquery UI Overrides*/

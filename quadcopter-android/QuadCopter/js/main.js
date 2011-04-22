@@ -3,6 +3,7 @@ var stopPosts;
 var unique = '';
 var customHost = window.location;
 var armed = false;
+var refreshMap = false;
 var getImages = false;
 var sensitivityFactor = 15;
 var AcrobaticMode = 1;
@@ -13,6 +14,8 @@ var right_down = false;
 var ROLL_TRIM = 0;
 var PITCH_TRIM = 0;
 var stepSizeThrottle = 1;
+var googleMap;
+var droidMarker;
 
 $(document).ready(function(){
 	$('#submitToggleDebug').toggle(function() {
@@ -22,6 +25,17 @@ $(document).ready(function(){
 		stopPosts = true;
 		$(this).val('Show Debug Section');
 		$('#divDebug').slideUp(400);
+	});
+	
+	$('#submitToggleMap').toggle(function() {
+		$(this).val('Hide Map Section');	
+		$('#divMapCanvas').show();
+		refreshMap = true;	
+		loadGoogleMaps();
+	}, function() {
+		refreshMap = false;
+		$(this).val('Show Map Section');		
+		$('#divMapCanvas').slideUp(400);
 	});
 	
 	$('#submitTogglePhoto').toggle(function() {
@@ -38,8 +52,7 @@ $(document).ready(function(){
 	$('#inputLoadPage').click(function() {
 		$('#lblCurrentIP').html(document.domain);
 		
-		$('#divStartUp').css('display', 'none');
-		$('#divMainContent').css('display', 'block');
+		showPage();
 	});
 	
 	$('#inputSubmitIP').click(function() {
@@ -47,8 +60,7 @@ $(document).ready(function(){
 		customHost = 'http://' + customIP + ':8080/';
 		$('#lblCurrentIP').html('<a href=' + customHost + ' target="blank">' + customIP + '</a>');		
 		
-		$('#divStartUp').css('display', 'none');
-		$('#divMainContent').css('display', 'block');
+		showPage();
 	});
 
 	$('#inputSave').click(function() {
@@ -96,7 +108,7 @@ $(document).ready(function(){
 	optionsElement.val('15').attr('selected', true);
 	
 	optionsElement.change(function() {
-		sensitivityFactor = parseInt($("#inputControlSensivity option:selected").text());
+		sensitivityFactor = parseInt($('#inputControlSensivity option:selected').text());
 	});
 	
 	optionsElement = $('#selectThrottleStepSize');
@@ -106,7 +118,7 @@ $(document).ready(function(){
 	optionsElement.html(optionsHTML);
 	
 	optionsElement.change(function() {
-		stepSizeThrottle = parseInt($("#selectThrottleStepSize option:selected").text());
+		stepSizeThrottle = parseInt($('#selectThrottleStepSize option:selected').text());
 	});
 	
 	$('#submitKillSwitch').click(killEngines);
@@ -363,7 +375,7 @@ function refreshImage()
 {
 	if(saveImage)
 	{
-		$('#divPhoto').append('<br>' + unique + '<br><div style="width: 480; height: 640; margin-top: 150px; margin-left: -50px"><img style="-webkit-transform: rotate(+90deg); -moz-transform: rotate(+90deg);" src="' + customHost + 'webcam.jpg?time=' + unique.getTime() + '"></div>');
+		$('#divPhoto').append('<br>' + unique + '<br><div style="width: 640; height: 480;"><img src="' + customHost + 'webcam.jpg?time=' + unique.getTime() + '"></div>');
 		saveImage = false;
 	}
 
@@ -428,4 +440,69 @@ function setupControls(controlName)
 		var currentValue = sliderDiv.slider('value');
 		sliderDiv.slider('value', currentValue-1);
 	});
+};
+
+function showPage()
+{
+	$('#divStartUp').css('display', 'none');
+	$('#divMainContent').css('display', 'block');
+};
+
+function loadGoogleMaps()
+{
+	//--dynamically add the goolge maps script to page
+	var script = document.createElement('script');
+	script.type = 'text/javascript';
+	script.src = 'http://maps.google.com/maps/api/js?sensor=false&callback=initializeGoogleMaps';
+	$('body').append(script);
+};
+
+function getLocationFromDroid()
+{
+	//--get gps data from the droid
+	$.ajax({
+		type: 'GET',
+		url: customHost + 'GPSDataServlet',
+		success: function(returnData) {
+			var gpsJson = $.parseJSON(returnData);
+			updateGoogleMaps(gpsJson.lat, gpsJson.lng);
+		}
+	});
+	
+	if(refreshMap)
+	{		
+		var t = setTimeout('getLocationFromDroid()', 1000);
+	}
+};
+
+function initializeGoogleMaps() {
+	//--hardcode initial startup position
+	var myLatlng = new google.maps.LatLng(0,0);
+	var myOptions = {
+		zoom: 18,
+		disableDefaultUI: true,
+		draggable: false,
+		scrollwheel: false,
+		center: myLatlng,
+		mapTypeId: google.maps.MapTypeId.ROADMAP
+	}
+	googleMap = new google.maps.Map(document.getElementById('divMapCanvas'), myOptions);
+
+	//--add marker for droidcopter
+	droidMarker = new google.maps.Marker({
+		position: myLatlng,
+		map: googleMap,
+		title:'Droidcopter Location',
+		icon: 'img/droid.png'
+	});
+
+	getLocationFromDroid();
+};
+
+function updateGoogleMaps(lat, lng)
+{
+	//--build LatLng object from coordinates
+	var newLatLing = new google.maps.LatLng(lat, lng);
+	googleMap.panTo(newLatLing);
+	droidMarker.setPosition(newLatLing);
 };
