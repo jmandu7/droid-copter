@@ -484,7 +484,7 @@ function initializeGoogleMaps() {
 		draggable: false,
 		scrollwheel: false,
 		center: myLatlng,
-		mapTypeId: google.maps.MapTypeId.ROADMAP
+		mapTypeId: google.maps.MapTypeId.HYBRID
 	}
 	googleMap = new google.maps.Map(document.getElementById('divMapCanvas'), myOptions);
 
