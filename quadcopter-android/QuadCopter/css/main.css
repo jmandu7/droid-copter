@@ -81,6 +81,12 @@ body {
 	height: 480;
 }
 
+a:link {color: #1D4C7A;}      /* unvisited link */
+a:visited {color: #1D4C7A;}  /* visited link */
+a:hover {color: #0B3E6F;}  /* mouse over link */
+a:active {color: #1D4C7A; outline: 0;}  /* selected link */
+a:focus{-moz-outline-style: none; outline: 0;} /*clicked link*/
+
 /*Jquery UI Overrides*/
 .ui-slider-horizontal { width: 275px; height: 13px; margin-top: 12px; margin-right: 35px; }
 .ui-slider-horizontal .ui-slider-handle { outline: none; border: none; width: 51px; height: 21px; top: -.3em; margin-left: -.6em; background: url(../img/slider.png); }
