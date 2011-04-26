@@ -67,6 +67,9 @@ body {
 #divBottom {
 	clear: both;
 }
+#divBottom input {
+	margin-bottom: 5px;
+}
 #divDebug {
 	display:none;
 }
