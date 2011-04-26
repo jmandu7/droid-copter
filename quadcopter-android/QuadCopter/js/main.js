@@ -464,7 +464,7 @@ function getLocationFromDroid()
 		type: 'GET',
 		url: customHost + 'GPSDataServlet',
 		success: function(returnData) {
-			var gpsJson = $.parseJSON("{\"lat\": 41.4129406, \"lng\":  -82.07093447777777}");
+			var gpsJson = $.parseJSON('{"lat": 41.4129406, "lng":  -82.07093447777777}');
 			updateGoogleMaps(gpsJson.lat, gpsJson.lng);
 		}
 	});
