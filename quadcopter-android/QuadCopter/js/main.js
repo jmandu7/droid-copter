@@ -5,7 +5,7 @@ var customHost = window.location;
 var armed = false;
 var refreshMap = false;
 var getImages = false;
-var sensitivityFactor = 15;
+var sensitivityFactor = 50;
 var AcrobaticMode = 1;
 var up_down = false;
 var down_down = false;
@@ -99,7 +99,7 @@ $(document).ready(function(){
 	
 	var optionsHTML;
 	var optionsElement = $('#inputControlSensivity');
-	for(var i=5; i<= 25; i = i+5)
+	for(var i=50; i<= 125; i = i+25)
 	{
 		optionsHTML += '<option>' + i + '</option>';
 	}
@@ -415,8 +415,8 @@ function setupControls(controlName)
 	sliderDiv.slider({
 		range: 'min',
 		value:500,
-		min: 400,
-		max: 600,
+		min: 300,
+		max: 700,
 		step: 1,
 		slide: function(event, ui) {
 			$('#lbl' +  controlName +  'Value').html(ui.value);
