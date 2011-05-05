@@ -25,6 +25,7 @@ public class RFControllerActivity extends Activity implements OnClickListener, O
 	Button stable;
 	Button kill;
 	Button reset;
+	Button callibrate;
 	
 	Button incRoll;
 	Button decRoll;
@@ -81,6 +82,7 @@ public class RFControllerActivity extends Activity implements OnClickListener, O
         acro = (Button)findViewById(R.id.btnAcro);
         kill = (Button)findViewById(R.id.btnKill);
         reset = (Button)findViewById(R.id.btnReset);
+        callibrate = (Button)findViewById(R.id.btnCallibrate);
         
         arm.setOnClickListener(this);
         disarm.setOnClickListener(this);
@@ -88,6 +90,7 @@ public class RFControllerActivity extends Activity implements OnClickListener, O
         acro.setOnClickListener(this);
         kill.setOnClickListener(this);
         reset.setOnClickListener(this);
+        callibrate.setOnClickListener(this);
         
         
         roll = (SeekBar)findViewById(R.id.sbRoll);
@@ -213,6 +216,9 @@ public class RFControllerActivity extends Activity implements OnClickListener, O
 		} else if (v==back)
 		{
 			startActivity(new Intent(this, QuadCopterActivity.class));
+		} else if (v==callibrate)
+		{
+			BluetoothCommunication.sendMessageToDevice(this, 'C', "");
 		}
 	}
 
