@@ -15,7 +15,7 @@ import android.util.Log;
 
 import com.quadcopter.R;
 import com.quadcopter.background.hardware.BluetoothCommunication;
-import com.quadcopter.background.webserver.CookiesDatabaseOpenHelper;
+import com.quadcopter.background.hardware.GPSRefresher;
 import com.quadcopter.background.webserver.WebServerThread;
 import com.quadcopter.ui.QuadCopterActivity;
 
@@ -38,6 +38,8 @@ public class BackgroundService extends Service
 	
 	private BluetoothCommunication bluetoothComm = null;
 	
+	private GPSRefresher mGPSRefresher = null;
+	
 	private final IBackgroundService.Stub mBinder = new IBackgroundService.Stub() {
 		@Override
 		public int getPort() {
@@ -59,6 +61,9 @@ public class BackgroundService extends Service
 		public void start() throws RemoteException {
 			if (bluetoothComm!=null)
 				bluetoothComm.start();
+			
+			if (mGPSRefresher!=null)
+				mGPSRefresher.start();
 			
 			if(mWebServerThread == null){
 				SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -84,6 +89,9 @@ public class BackgroundService extends Service
 		public void stop() throws RemoteException {
 			if (bluetoothComm!=null)
 				bluetoothComm.stop();
+			
+			if (mGPSRefresher!=null)
+				mGPSRefresher.stop();
 			
 			if(mWebServerThread != null){
 				int port = getPort();
@@ -124,6 +132,8 @@ public class BackgroundService extends Service
 		super.onCreate();
 		bluetoothComm = new BluetoothCommunication(this, BluetoothAdapter.getDefaultAdapter()
 												,BLUETOOTH_DEVICE_ADDRESS);	
+		
+		mGPSRefresher = new GPSRefresher(this);
 	}
 
 	@Override
@@ -132,6 +142,9 @@ public class BackgroundService extends Service
 		
 		if (bluetoothComm!=null)
 			bluetoothComm.stop();
+		
+		if (mGPSRefresher!=null)
+			mGPSRefresher.stop();
 		
 		stopForeground(true);
 	}
