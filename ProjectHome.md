@@ -1,0 +1,1 @@
+This project is a university of Toledo senior design project. We will be creating a quadcopter that will act as a home delivery system. This could be useful for local stores and/or restaurants (OK, probably not but it's a fun idea).
